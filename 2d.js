@@ -550,48 +550,23 @@ function loadImage(imagePath) {
  * @param {HTMLImageElement} image - Der Pfad zum Bild, das auf das Canvas gezeichnet werden soll.
  * @param {number} x - Die x-Koordinate der Position, an der das Bild angezeigt wird.
  * @param {number} y - Die y-Koordinate der Position, an der das Bild angezeigt wird.
- *
- * @example
- * // Lädt das Bild "image.png" und zeigt es bei (50, 50) an
- * image('image.png', 50, 50);
- */
-function image(image, x, y) {
-  if (image.dataset.loaded !== 'true') {
-    return;
-  }
-
-  _ctx.save();
-
-  _ctx.translate(x + image.width / 2, y + image.height / 2);
-  _ctx.rotate(rotation);
-  _ctx.drawImage(image, -image.width / 2, -image.height / 2, image.width, image.height);
-
-  _ctx.restore();
-}
-
-/**
- * Zeichnet ein Bild auf die Zeichenfläche an einer angegebenen Position und mit einer angegebenen Größe.
- *
- * @param {HTMLImageElement} image - Der Pfad zum Bild, das auf das Canvas gezeichnet werden soll.
- * @param {number} x - Die x-Koordinate der Position, an der das Bild angezeigt wird.
- * @param {number} y - Die y-Koordinate der Position, an der das Bild angezeigt wird.
- * @param {number} width - Die Breite des angezeigten Bildes.
- * @param {number} height - Die Höhe des angezeigten Bildes.
+ * @param {number} [width] - Die Breite des angezeigten Bildes.
+ * @param {number} [height] - Die Höhe des angezeigten Bildes.
  *
  * @example
  * // Lädt das Bild "image.png" und zeigt es bei (50, 50) mit einer Breite von 200 und einer Höhe von 150 an
  * image('image.png', 50, 50, 200, 150);
  */
-function imageScaled(image, x, y, width, height) {
+function image(image, x, y, width, height) {
   if (image.dataset.loaded !== 'true') {
     return;
   }
 
   _ctx.save();
 
-  _ctx.translate(x + width / 2, y + height / 2);
+  _ctx.translate(x + (width ?? image.width) / 2, y + (height ?? image.height) / 2);
   _ctx.rotate(rotation);
-  _ctx.drawImage(image, -width / 2, -height / 2, width, height);
+  _ctx.drawImage(image, -(width ?? image.width) / 2, -(height ?? image.height) / 2, width ?? image.width, height ?? image.height);
 
   _ctx.restore();
 }
