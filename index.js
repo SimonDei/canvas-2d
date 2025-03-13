@@ -1,9 +1,11 @@
-createCanvas(800, 800 * 9 / 16);
-
 const flowers = [];
 let img = null;
+let bitmap = null;
+let rot1 = 0;
 
 function setup() {
+  createCanvas(1000, 1000 * 9 / 16);
+
   img = loadImage('./mushroom.png');
 
   for (let i = 0; i < 6; i++) {
@@ -15,13 +17,23 @@ function setup() {
       color: random([RED, GRAY, ORANGE, YELLOW, BLUE, TEAL, PURPLE, PINK])
     });
   }
+
+  bitmap = new DrawImage(100, 100);
+  for (let y = 0; y < 100; y++) {
+    for (let x = 0; x < 100; x++) {
+      bitmap.set(x, y, random([GRAY, ORANGE, YELLOW, BLUE, TEAL, PURPLE, PINK]));
+    }
+  }
+
+  bitmap.scale(3);
+
+  bitmap.update();
 }
 
 function draw() {
   background(BLACK);
 
-  fill(WHITE);
-  text(deltaTime.toFixed(2), 10, 10);
+  noStroke();
 
   for (const flower of flowers) {
     fill(flower.color);
@@ -35,8 +47,10 @@ function draw() {
     circle(flower.x, flower.y, 10);
   }
 
-  rotate(0);
-  imageScaled(img, 50, 50, 100, 100);
+  rot1 += deltaTime * 0.5;
+  rotate(rot1);
+
+  bitmap.draw(200 + sin(frameCount * 0.04) * 100, 200 + cos(frameCount * 0.04) * 100);
 }
 
 function mouseClicked() {
