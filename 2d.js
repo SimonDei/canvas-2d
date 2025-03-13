@@ -1,9 +1,34 @@
 /** @type {HTMLCanvasElement} */
-let canvas = null;
+let _canvas = null;
 /** @type {CanvasRenderingContext2D} */
-let ctx = null;
+let _ctx = null;
+/** @type {number} */
+let _frameRate = 60;
+/** @type {number} */
+let _intervalId = null;
+/** @type {Function} */
+let _intervalCallback = null;
 /** @type {number} */
 let rotation = 0;
+/** @type {number} */
+let _textSize = 20;
+/** @type {number} */
+let _angleMode = Math.PI / 180;
+/** @type {boolean} */
+let _mouseMoved = false;
+/** @type {{ type: string, callback: Function }[]} */
+const _listeners = [];
+
+class Vector2 {
+  /**
+   * @param {number} x
+   * @param {number} y
+   */
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+  }
+}
 
 class Vector3 {
   /**
@@ -22,35 +47,107 @@ class Vector3 {
   }
 }
 
-export function createCanvas() {
-  document.body.style.cssText = `
-    margin: 0;
-    padding: 0;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #222222;
-  `;
-  canvas = document.createElement('canvas');
-  canvas.width = 800;
-  canvas.height = 800 * 9 / 16;
-  document.body.appendChild(canvas);
+const DEGREES = 1;
+const RADIANS = 2;
+const QUARTER_PI = Math.PI / 4;
+const HALF_PI = Math.PI / 2;
+const PI = Math.PI;
+const TWO_PI = Math.PI * 2;
 
-  ctx = canvas.getContext('2d');
-  background(makeColor(0, 0, 0));
+let canvas = null;
+let frameCount = 0;
+let deltaTime = 0;
+let width = 0;
+let height = 0;
+const windowWidth = window.visualViewport.width;
+const windowHeight = window.visualViewport.height;
+let mouseX = 0;
+let mouseY = 0;
+
+/**
+ * @param {number} w
+ * @param {number} h
+ */
+function createCanvas(w, h) {
+  width = w;
+  height = h;
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    document.body.style.cssText = `
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #222222;
+    `;
+
+    _canvas = document.createElement('canvas');
+    _canvas.width = w;
+    _canvas.height = h;
+    document.body.appendChild(_canvas);
+    
+    canvas = _canvas;
+
+    _canvas.addEventListener('click', () => mouseClicked?.());
+
+    _canvas.addEventListener('mousemove', function(event) {
+      mouseX = event.x - _canvas.getBoundingClientRect().x;
+      mouseY = event.y - _canvas.getBoundingClientRect().y;
+      _mouseMoved = true;
+    });
+
+    _ctx = _canvas.getContext('2d');
+    background(BLACK);
+
+    setup?.();
+
+    _intervalCallback = () => {
+      const startTime = performance.now();
+      draw?.();
+      if (_mouseMoved) {
+        mouseMoved?.();
+      }
+      frameCount++;
+      deltaTime = performance.now() - startTime;
+    };
+
+    _intervalId = setInterval(_intervalCallback, 1000 / _frameRate);
+  });
 }
 
-export function draw(drawCallback) {
-  setInterval(drawCallback, 1000 / 60);
+/**
+ * @param {number} [fps]
+ * @returns {number|void}
+ */
+function frameRate(fps) {
+  if (fps === null || fps === undefined) {
+    return _frameRate;
+  }
+  if (fps === _frameRate) {
+    return;
+  }
+  _frameRate = fps;
+  if (!_intervalId) {
+    return;
+  }
+  clearInterval(_intervalId);
+  _intervalId = setInterval(_intervalCallback, 1000 / fps);
 }
 
-export function width() {
-  return canvas.width;
-}
-
-export function height() {
-  return canvas.height;
+/**
+ * @param {boolean} [val]
+ * @returns {boolean|void}
+ */
+function fullscreen(val) {
+  if (val === null || val === undefined) {
+    return document.fullscreenElement !== null;
+  } else if (val) {
+    _canvas.requestFullscreen();
+  } else {
+    document.exitFullscreen();
+  }
 }
 
 //#region Farbkonstanten
@@ -62,7 +159,7 @@ export function height() {
  * // Verwendet die Konstante BLACK, um den Hintergrund schwarz zu machen
  * background(BLACK);
  */
-export const BLACK = makeColor(0, 0, 0);
+const BLACK = makeColor(0, 0, 0);
 
 /**
  * Die Farbe Weiß.
@@ -71,7 +168,7 @@ export const BLACK = makeColor(0, 0, 0);
  * // Verwendet die Konstante WHITE, um den Hintergrund weiß zu machen
  * background(WHITE);
  */
-export const WHITE = makeColor(100, 100, 100);
+const WHITE = makeColor(100, 100, 100);
 
 /**
  * Die Farbe Grau.
@@ -80,7 +177,7 @@ export const WHITE = makeColor(100, 100, 100);
  * // Verwendet die Konstante GRAY, um die Füllfarbe auf Grau zu setzen
  * fill(GRAY);
  */
-export const GRAY = makeColor(50, 50, 50);
+const GRAY = makeColor(50, 50, 50);
 
 /**
  * Die Farbe Rot.
@@ -89,7 +186,7 @@ export const GRAY = makeColor(50, 50, 50);
  * // Verwendet die Konstante RED, um den Hintergrund rot zu machen
  * background(RED);
  */
-export const RED = makeColor(100, 0, 0);
+const RED = makeColor(100, 0, 0);
 
 /**
  * Die Farbe Grün.
@@ -98,7 +195,7 @@ export const RED = makeColor(100, 0, 0);
  * // Verwendet die Konstante GREEN, um den Hintergrund grün zu machen
  * background(GREEN);
  */
-export const GREEN = makeColor(0, 100, 0);
+const GREEN = makeColor(0, 100, 0);
 
 /**
  * Die Farbe Blau.
@@ -107,7 +204,7 @@ export const GREEN = makeColor(0, 100, 0);
  * // Verwendet die Konstante BLUE, um den Hintergrund blau zu machen
  * background(BLUE);
  */
-export const BLUE = makeColor(0, 0, 100);
+const BLUE = makeColor(0, 0, 100);
 
 /**
  * Die Farbe Gelb.
@@ -116,7 +213,7 @@ export const BLUE = makeColor(0, 0, 100);
  * // Verwendet die Konstante YELLOW, um einen gelben Kreis zu zeichnen
  * fill(YELLOW);
  */
-export const YELLOW = makeColor(100, 100, 0);
+const YELLOW = makeColor(100, 100, 0);
 
 /**
  * Die Farbe Orange.
@@ -125,7 +222,7 @@ export const YELLOW = makeColor(100, 100, 0);
  * // Verwendet die Konstante ORANGE, um eine Linie in Orange zu zeichnen
  * stroke(ORANGE);
  */
-export const ORANGE = makeColor(100, 50, 0);
+const ORANGE = makeColor(100, 50, 0);
 
 /**
  * Die Farbe Türkis.
@@ -134,7 +231,7 @@ export const ORANGE = makeColor(100, 50, 0);
  * // Verwendet die Konstante TEAL, um einen türkisen Kreis zu füllen
  * fill(TEAL);
  */
-export const TEAL = makeColor(0, 100, 100);
+const TEAL = makeColor(0, 100, 100);
 
 /**
  * Die Farbe Lila.
@@ -143,7 +240,7 @@ export const TEAL = makeColor(0, 100, 100);
  * // Verwendet die Konstante PURPLE, um einen lila Hintergrund zu erstellen
  * background(PURPLE);
  */
-export const PURPLE = makeColor(50, 0, 50);
+const PURPLE = makeColor(50, 0, 50);
 
 /**
  * Die Farbe Rosa.
@@ -152,7 +249,7 @@ export const PURPLE = makeColor(50, 0, 50);
  * // Verwendet die Konstante PINK, um eine Linie in Pink zu zeichnen
  * stroke(PINK);
  */
-export const PINK = makeColor(100, 0, 50);
+const PINK = makeColor(100, 0, 50);
 
 //#endregion Farbkonstanten
 
@@ -172,7 +269,7 @@ export const PINK = makeColor(100, 0, 50);
  * // Erstellt eine mittlere Graufarbe
  * const gray = makeColor(50, 50, 50);
  */
-export function makeColor(red, green, blue) {
+function makeColor(red, green, blue) {
   return new Vector3(red / 100.0, green / 100.0, blue / 100.0);
 }
 
@@ -186,9 +283,9 @@ export function makeColor(red, green, blue) {
  * // Setzt den Hintergrund auf Schwarz
  * background(makeColor(0, 0, 0));
  */
-export function background(color) {
-  ctx.fillStyle = color.toString();
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+function background(color) {
+  _ctx.fillStyle = color.toString();
+  _ctx.fillRect(0, 0, _canvas.width, _canvas.height);
 }
 
 /**
@@ -207,8 +304,8 @@ export function background(color) {
  *
  * @see makeColor - Kann verwendet werden, um eine RGB-Farbe aus Prozentwerten zu erzeugen.
  */
-export function fill(color) {
-  ctx.fillStyle = color.toString();
+function fill(color) {
+  _ctx.fillStyle = color.toString();
 }
 
 /**
@@ -227,8 +324,20 @@ export function fill(color) {
  *
  * @see makeColor - Kann verwendet werden, um eine RGB-Farbe aus Prozentwerten zu erzeugen.
  */
-export function stroke(color) {
-  ctx.strokeStyle = color.toString();
+function stroke(color) {
+  _ctx.strokeStyle = color.toString();
+}
+
+function lineWidth(width) {
+  _ctx.lineWidth = width;
+}
+
+function point(x, y, size = 1) {
+  _ctx.save();
+
+  _ctx.fillRect(x, y, size, size);
+
+  _ctx.restore();
 }
 
 /**
@@ -243,15 +352,28 @@ export function stroke(color) {
  * // Zeichnet eine Linie von (50, 50) nach (200, 200)
  * line(50, 50, 200, 200);
  */
-export function line(x1, y1, x2, y2) {
-  ctx.save();
+function line(x1, y1, x2, y2) {
+  _ctx.save();
 
-  ctx.beginPath();
-  ctx.moveTo(x1, y1);
-  ctx.lineTo(x2, y2);
-  ctx.stroke();
+  _ctx.beginPath();
+  _ctx.moveTo(x1, y1);
+  _ctx.lineTo(x2, y2);
+  _ctx.stroke();
 
-  ctx.restore();
+  _ctx.restore();
+}
+
+function triangle(x1, y1, x2, y2, x3, y3) {
+  _ctx.save();
+
+  _ctx.beginPath();
+  _ctx.moveTo(x1, y1);
+  _ctx.lineTo(x2, y2);
+  _ctx.lineTo(x3, y3);
+  _ctx.lineTo(x1, y1);
+  _ctx.stroke();
+
+  _ctx.restore();
 }
 
 /**
@@ -265,19 +387,19 @@ export function line(x1, y1, x2, y2) {
  * // Zeichnet ein Quadrat mit der oberen linken Ecke bei (50, 50) und einer Größe von 100 Pixeln
  * square(50, 50, 100);
  */
-export function square(x, y, size) {
-  ctx.save();
+function square(x, y, size) {
+  _ctx.save();
 
-  ctx.translate(x + size / 2, y + size / 2);
-  ctx.rotate(rotation * Math.PI / 180);
-  ctx.translate(size / -2, size / -2);
-  ctx.scale(size, size);
+  _ctx.translate(x + size / 2, y + size / 2);
+  _ctx.rotate(rotation);
+  _ctx.translate(size / -2, size / -2);
+  _ctx.scale(size, size);
 
-  ctx.beginPath();
-  ctx.rect(0, 0, 1, 1);
-  ctx.fill();
+  _ctx.beginPath();
+  _ctx.rect(0, 0, 1, 1);
+  _ctx.fill();
 
-  ctx.restore();
+  _ctx.restore();
 }
 
 /**
@@ -293,19 +415,19 @@ export function square(x, y, size) {
  * // einer Breite von 200 Pixeln und einer Höhe von 100 Pixeln
  * rectangle(50, 50, 200, 100);
  */
-export function rectangle(x, y, width, height) {
-  ctx.save();
+function rect(x, y, width, height) {
+  _ctx.save();
 
-  ctx.translate(x + width / 2, y + height / 2);
-  ctx.rotate(rotation * Math.PI / 180);
-  ctx.translate(width / -2, height / -2);
-  ctx.scale(width, height);
+  _ctx.translate(x + width / 2, y + height / 2);
+  _ctx.rotate(rotation);
+  _ctx.translate(width / -2, height / -2);
+  _ctx.scale(width, height);
 
-  ctx.beginPath();
-  ctx.rect(0, 0, 1, 1);
-  ctx.fill();
+  _ctx.beginPath();
+  _ctx.rect(0, 0, 1, 1);
+  _ctx.fill();
 
-  ctx.restore();
+  _ctx.restore();
 }
 
 /**
@@ -319,14 +441,14 @@ export function rectangle(x, y, width, height) {
  * // Zeichnet einen Kreis mit Mittelpunkt (100, 100) und einem Radius von 50 Pixeln
  * circle(100, 100, 50);
  */
-export function circle(x, y, radius) {
-  ctx.save();
+function circle(x, y, radius) {
+  _ctx.save();
 
-  ctx.beginPath();
-  ctx.arc(x, y, radius, 0, Math.PI * 2, false);
-  ctx.fill();
+  _ctx.beginPath();
+  _ctx.arc(x, y, radius, 0, Math.PI * 2, false);
+  _ctx.fill();
 
-  ctx.restore();
+  _ctx.restore();
 }
 
 /**
@@ -342,17 +464,24 @@ export function circle(x, y, radius) {
  * // und vertikalem Radius 30 Pixel
  * ellipse(100, 100, 50, 30);
  */
-export function ellipse(x, y, radiusX, radiusY) {
-  ctx.save();
+function ellipse(x, y, radiusX, radiusY) {
+  _ctx.save();
 
-  ctx.translate(x, y);
-  ctx.rotate(rotation * Math.PI / 180);
+  _ctx.translate(x, y);
+  _ctx.rotate(rotation);
 
-  ctx.beginPath();
-  ctx.ellipse(0, 0, radiusX, radiusY, 0, 0, Math.PI * 2);
-  ctx.fill();
+  _ctx.beginPath();
+  _ctx.ellipse(0, 0, radiusX, radiusY, 0, 0, Math.PI * 2);
+  _ctx.fill();
 
-  ctx.restore();
+  _ctx.restore();
+}
+
+/**
+ * @param {number} size
+ */
+function textSize(size) {
+  _textSize = size;
 }
 
 /**
@@ -361,7 +490,7 @@ export function ellipse(x, y, radiusX, radiusY) {
  * @param {string} text - Der Text, der auf dem Canvas angezeigt werden soll.
  * @param {number} x - Die x-Koordinate der Position, an der der Text beginnt.
  * @param {number} y - Die y-Koordinate der Position, an der der Text beginnt.
- * @param {number} [size=20] - Die Schriftgröße des Textes in Pixeln. Standardwert ist 20.
+ * @param {number} [size] - Die Schriftgröße des Textes in Pixeln. Standardwert ist 20.
  *
  * @example
  * // Zeichnet den Text "Hallo Welt!" an der Position (50, 100) mit der Schriftgröße 30
@@ -371,20 +500,79 @@ export function ellipse(x, y, radiusX, radiusY) {
  * // Zeichnet den Text "Canvas ist cool!" an der Position (150, 150) mit der Standard-Schriftgröße 20
  * text("Canvas ist cool!", 150, 150);
  */
-export function text(text, x, y, size = 20) {
-  ctx.font = `${size}px Arial`;
+function text(text, x, y, size) {
+  _ctx.font = `${size ?? _textSize}px Arial`;
 
-  ctx.save();
+  _ctx.save();
 
-  ctx.fillText(text, x, y);
+  _ctx.fillText(text, x, y + (size ?? _textSize));
 
-  ctx.restore();
+  _ctx.restore();
+}
+
+/**
+ * @param {number} sizeX
+ * @param {number} sizeY
+ */
+function grid(sizeX, sizeY) {
+  _ctx.save();
+  _ctx.beginPath();
+
+  for (let x = 0; x < width / sizeX; x++) {
+    for (let y = 0; y < height / sizeY; y++) {
+      _ctx.moveTo(0, y * sizeY);
+      _ctx.lineTo(width, y * sizeY);
+    }
+    _ctx.moveTo(x * sizeX, 0);
+    _ctx.lineTo(x * sizeX, height);
+  }
+
+  _ctx.stroke();
+  _ctx.restore();
+}
+
+/**
+ * @param {string} imagePath
+ * @returns {HTMLImageElement}
+ */
+function loadImage(imagePath) {
+  const image = new Image();
+  image.src = imagePath;
+  image.onload = () => {
+    image.dataset.loaded = 'true';
+  }
+  return image;
 }
 
 /**
  * Zeichnet ein Bild auf die Zeichenfläche an einer angegebenen Position und mit einer angegebenen Größe.
  *
- * @param {string} imagePath - Der Pfad zum Bild, das auf das Canvas gezeichnet werden soll.
+ * @param {HTMLImageElement} image - Der Pfad zum Bild, das auf das Canvas gezeichnet werden soll.
+ * @param {number} x - Die x-Koordinate der Position, an der das Bild angezeigt wird.
+ * @param {number} y - Die y-Koordinate der Position, an der das Bild angezeigt wird.
+ *
+ * @example
+ * // Lädt das Bild "image.png" und zeigt es bei (50, 50) an
+ * image('image.png', 50, 50);
+ */
+function image(image, x, y) {
+  if (image.dataset.loaded !== 'true') {
+    return;
+  }
+
+  _ctx.save();
+
+  _ctx.translate(x + image.width / 2, y + image.height / 2);
+  _ctx.rotate(rotation);
+  _ctx.drawImage(image, -image.width / 2, -image.height / 2, image.width, image.height);
+
+  _ctx.restore();
+}
+
+/**
+ * Zeichnet ein Bild auf die Zeichenfläche an einer angegebenen Position und mit einer angegebenen Größe.
+ *
+ * @param {HTMLImageElement} image - Der Pfad zum Bild, das auf das Canvas gezeichnet werden soll.
  * @param {number} x - Die x-Koordinate der Position, an der das Bild angezeigt wird.
  * @param {number} y - Die y-Koordinate der Position, an der das Bild angezeigt wird.
  * @param {number} width - Die Breite des angezeigten Bildes.
@@ -394,16 +582,29 @@ export function text(text, x, y, size = 20) {
  * // Lädt das Bild "image.png" und zeigt es bei (50, 50) mit einer Breite von 200 und einer Höhe von 150 an
  * image('image.png', 50, 50, 200, 150);
  */
-export function image(imagePath, x, y, width, height) {
-  const img = new Image();
-  img.src = imagePath;
-  img.onload = () => {
-    ctx.save();
-    ctx.translate(x + width / 2, y + height / 2);
-    ctx.rotate(rotation * Math.PI / 180);
-    ctx.drawImage(img, -width / 2, -height / 2, width, height);
-    ctx.restore();
-  };
+function imageScaled(image, x, y, width, height) {
+  if (image.dataset.loaded !== 'true') {
+    return;
+  }
+
+  _ctx.save();
+
+  _ctx.translate(x + width / 2, y + height / 2);
+  _ctx.rotate(rotation);
+  _ctx.drawImage(image, -width / 2, -height / 2, width, height);
+
+  _ctx.restore();
+}
+
+/**
+ * @param {number} mode
+ */
+function angleMode(mode) {
+  if (mode === DEGREES) {
+    _angleMode = Math.PI / 180;
+  } else if (mode === RADIANS) {
+    _angleMode = 1;
+  }
 }
 
 /**
@@ -420,8 +621,8 @@ export function image(imagePath, x, y, width, height) {
  * // Dreht die Zeichenfläche um 90 Grad gegen den Uhrzeigersinn
  * rotate(-90);
  */
-export function rotate(degrees) {
-  rotation = degrees;
+function rotate(degrees) {
+  rotation = degrees * _angleMode;
 }
 
 /**
@@ -430,7 +631,7 @@ export function rotate(degrees) {
  * @param {number} [max] 
  * @returns {T|number}
  */
-export function random(min, max) {
+function random(min, max) {
   if (Array.isArray(min)) {
     return min[Math.floor(Math.random() * min.length)];
   }
