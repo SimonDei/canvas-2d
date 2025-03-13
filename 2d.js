@@ -1,23 +1,25 @@
-/** @type {HTMLCanvasElement} */
-let _canvas = null;
-/** @type {CanvasRenderingContext2D} */
-let _ctx = null;
-/** @type {number} */
-let _frameRate = 60;
-/** @type {number} */
-let _intervalId = null;
-/** @type {Function} */
-let _intervalCallback = null;
-/** @type {number} */
-let rotation = 0;
-/** @type {number} */
-let _textSize = 20;
-/** @type {number} */
-let _angleMode = Math.PI / 180;
-/** @type {boolean} */
-let _mouseMoved = false;
-/** @type {{ type: string, callback: Function }[]} */
-const _listeners = [];
+const __2djs = {
+  /** @type {HTMLCanvasElement} */
+  canvas: null,
+  /** @type {CanvasRenderingContext2D} */
+  ctx: null,
+  /** @type {number} */
+  frameRate: 60,
+  /** @type {number} */
+  intervalId: null,
+  /** @type {Function} */
+  intervalCallback: null,
+  /** @type {number} */
+  rotation: 0,
+  /** @type {number} */
+  textSize: 20,
+  /** @type {number} */
+  angleMode: Math.PI / 180,
+  /** @type {boolean} */
+  mouseMoved: false,
+  /** @type {{ type: string, callback: Function }[]} */
+  listeners: []
+}
 
 class Vector2 {
   /**
@@ -83,37 +85,37 @@ function createCanvas(w, h) {
       background-color: #222222;
     `;
 
-    _canvas = document.createElement('canvas');
-    _canvas.width = w;
-    _canvas.height = h;
-    document.body.appendChild(_canvas);
+    __2djs.canvas = document.createElement('canvas');
+    __2djs.canvas.width = w;
+    __2djs.canvas.height = h;
+    document.body.appendChild(__2djs.canvas);
     
-    canvas = _canvas;
+    canvas = __2djs.canvas;
 
-    _canvas.addEventListener('click', () => mouseClicked?.());
+    __2djs.canvas.addEventListener('click', () => mouseClicked?.());
 
-    _canvas.addEventListener('mousemove', function(event) {
-      mouseX = event.x - _canvas.getBoundingClientRect().x;
-      mouseY = event.y - _canvas.getBoundingClientRect().y;
+    __2djs.canvas.addEventListener('mousemove', function(event) {
+      mouseX = event.x - __2djs.canvas.getBoundingClientRect().x;
+      mouseY = event.y - __2djs.canvas.getBoundingClientRect().y;
       _mouseMoved = true;
     });
 
-    _ctx = _canvas.getContext('2d');
+    __2djs.ctx = _canvas.getContext('2d');
     background(BLACK);
 
     setup?.();
 
-    _intervalCallback = () => {
+    __2djs.intervalCallback = () => {
       const startTime = performance.now();
       draw?.();
-      if (_mouseMoved) {
+      if (__2djs.mouseMoved) {
         mouseMoved?.();
       }
       frameCount++;
       deltaTime = performance.now() - startTime;
     };
 
-    _intervalId = setInterval(_intervalCallback, 1000 / _frameRate);
+    __2djs.intervalId = setInterval(__2djs.intervalCallback, 1000 / __2djs.frameRate);
   });
 }
 
@@ -123,17 +125,17 @@ function createCanvas(w, h) {
  */
 function frameRate(fps) {
   if (fps === null || fps === undefined) {
-    return _frameRate;
+    return __2djs.frameRate;
   }
-  if (fps === _frameRate) {
+  if (fps === __2djs.frameRate) {
     return;
   }
-  _frameRate = fps;
+  __2djs.frameRate = fps;
   if (!_intervalId) {
     return;
   }
-  clearInterval(_intervalId);
-  _intervalId = setInterval(_intervalCallback, 1000 / fps);
+  clearInterval(__2djs.intervalId);
+  __2djs.intervalId = setInterval(__2djs.intervalCallback, 1000 / fps);
 }
 
 /**
@@ -144,7 +146,7 @@ function fullscreen(val) {
   if (val === null || val === undefined) {
     return document.fullscreenElement !== null;
   } else if (val) {
-    _canvas.requestFullscreen();
+    __2djs.canvas.requestFullscreen();
   } else {
     document.exitFullscreen();
   }
@@ -284,8 +286,8 @@ function makeColor(red, green, blue) {
  * background(makeColor(0, 0, 0));
  */
 function background(color) {
-  _ctx.fillStyle = color.toString();
-  _ctx.fillRect(0, 0, _canvas.width, _canvas.height);
+  __2djs.ctx.fillStyle = color.toString();
+  __2djs.ctx.fillRect(0, 0, __2djs.canvas.width, __2djs.canvas.height);
 }
 
 /**
@@ -305,7 +307,7 @@ function background(color) {
  * @see makeColor - Kann verwendet werden, um eine RGB-Farbe aus Prozentwerten zu erzeugen.
  */
 function fill(color) {
-  _ctx.fillStyle = color.toString();
+  __2djs.ctx.fillStyle = color.toString();
 }
 
 /**
@@ -325,19 +327,19 @@ function fill(color) {
  * @see makeColor - Kann verwendet werden, um eine RGB-Farbe aus Prozentwerten zu erzeugen.
  */
 function stroke(color) {
-  _ctx.strokeStyle = color.toString();
+  __2djs.ctx.strokeStyle = color.toString();
 }
 
 function lineWidth(width) {
-  _ctx.lineWidth = width;
+  __2djs.ctx.lineWidth = width;
 }
 
 function point(x, y, size = 1) {
-  _ctx.save();
+  __2djs.ctx.save();
 
-  _ctx.fillRect(x, y, size, size);
+  __2djs.ctx.fillRect(x, y, size, size);
 
-  _ctx.restore();
+  __2djs.ctx.restore();
 }
 
 /**
@@ -353,27 +355,27 @@ function point(x, y, size = 1) {
  * line(50, 50, 200, 200);
  */
 function line(x1, y1, x2, y2) {
-  _ctx.save();
+  __2djs.ctx.save();
 
-  _ctx.beginPath();
-  _ctx.moveTo(x1, y1);
-  _ctx.lineTo(x2, y2);
-  _ctx.stroke();
+  __2djs.ctx.beginPath();
+  __2djs.ctx.moveTo(x1, y1);
+  __2djs.ctx.lineTo(x2, y2);
+  __2djs.ctx.stroke();
 
-  _ctx.restore();
+  __2djs.ctx.restore();
 }
 
 function triangle(x1, y1, x2, y2, x3, y3) {
-  _ctx.save();
+  __2djs.ctx.save();
 
-  _ctx.beginPath();
-  _ctx.moveTo(x1, y1);
-  _ctx.lineTo(x2, y2);
-  _ctx.lineTo(x3, y3);
-  _ctx.lineTo(x1, y1);
-  _ctx.stroke();
+  __2djs.ctx.beginPath();
+  __2djs.ctx.moveTo(x1, y1);
+  __2djs.ctx.lineTo(x2, y2);
+  __2djs.ctx.lineTo(x3, y3);
+  __2djs.ctx.lineTo(x1, y1);
+  __2djs.ctx.stroke();
 
-  _ctx.restore();
+  __2djs.ctx.restore();
 }
 
 /**
@@ -388,18 +390,18 @@ function triangle(x1, y1, x2, y2, x3, y3) {
  * square(50, 50, 100);
  */
 function square(x, y, size) {
-  _ctx.save();
+  __2djs.ctx.save();
 
-  _ctx.translate(x + size / 2, y + size / 2);
-  _ctx.rotate(rotation);
-  _ctx.translate(size / -2, size / -2);
-  _ctx.scale(size, size);
+  __2djs.ctx.translate(x + size / 2, y + size / 2);
+  __2djs.ctx.rotate(rotation);
+  __2djs.ctx.translate(size / -2, size / -2);
+  __2djs.ctx.scale(size, size);
 
-  _ctx.beginPath();
-  _ctx.rect(0, 0, 1, 1);
-  _ctx.fill();
+  __2djs.ctx.beginPath();
+  __2djs.ctx.rect(0, 0, 1, 1);
+  __2djs.ctx.fill();
 
-  _ctx.restore();
+  __2djs.ctx.restore();
 }
 
 /**
@@ -416,18 +418,18 @@ function square(x, y, size) {
  * rectangle(50, 50, 200, 100);
  */
 function rect(x, y, width, height) {
-  _ctx.save();
+  __2djs.ctx.save();
 
-  _ctx.translate(x + width / 2, y + height / 2);
-  _ctx.rotate(rotation);
-  _ctx.translate(width / -2, height / -2);
-  _ctx.scale(width, height);
+  __2djs.ctx.translate(x + width / 2, y + height / 2);
+  __2djs.ctx.rotate(rotation);
+  __2djs.ctx.translate(width / -2, height / -2);
+  __2djs.ctx.scale(width, height);
 
-  _ctx.beginPath();
-  _ctx.rect(0, 0, 1, 1);
-  _ctx.fill();
+  __2djs.ctx.beginPath();
+  __2djs.ctx.rect(0, 0, 1, 1);
+  __2djs.ctx.fill();
 
-  _ctx.restore();
+  __2djs.ctx.restore();
 }
 
 /**
@@ -442,13 +444,13 @@ function rect(x, y, width, height) {
  * circle(100, 100, 50);
  */
 function circle(x, y, radius) {
-  _ctx.save();
+  __2djs.ctx.save();
 
-  _ctx.beginPath();
-  _ctx.arc(x, y, radius, 0, Math.PI * 2, false);
-  _ctx.fill();
+  __2djs.ctx.beginPath();
+  __2djs.ctx.arc(x, y, radius, 0, Math.PI * 2, false);
+  __2djs.ctx.fill();
 
-  _ctx.restore();
+  __2djs.ctx.restore();
 }
 
 /**
@@ -465,23 +467,23 @@ function circle(x, y, radius) {
  * ellipse(100, 100, 50, 30);
  */
 function ellipse(x, y, radiusX, radiusY) {
-  _ctx.save();
+  __2djs.ctx.save();
 
-  _ctx.translate(x, y);
-  _ctx.rotate(rotation);
+  __2djs.ctx.translate(x, y);
+  __2djs.ctx.rotate(rotation);
 
-  _ctx.beginPath();
-  _ctx.ellipse(0, 0, radiusX, radiusY, 0, 0, Math.PI * 2);
-  _ctx.fill();
+  __2djs.ctx.beginPath();
+  __2djs.ctx.ellipse(0, 0, radiusX, radiusY, 0, 0, Math.PI * 2);
+  __2djs.ctx.fill();
 
-  _ctx.restore();
+  __2djs.ctx.restore();
 }
 
 /**
  * @param {number} size
  */
 function textSize(size) {
-  _textSize = size;
+  __2djs.textSize = size;
 }
 
 /**
@@ -501,13 +503,13 @@ function textSize(size) {
  * text("Canvas ist cool!", 150, 150);
  */
 function text(text, x, y, size) {
-  _ctx.font = `${size ?? _textSize}px Arial`;
+  __2djs.ctx.font = `${size ?? __2djs.textSize}px Arial`;
 
-  _ctx.save();
+  __2djs.ctx.save();
 
-  _ctx.fillText(text, x, y + (size ?? _textSize));
+  __2djs.ctx.fillText(text, x, y + (size ?? __2djs.textSize));
 
-  _ctx.restore();
+  __2djs.ctx.restore();
 }
 
 /**
@@ -515,20 +517,20 @@ function text(text, x, y, size) {
  * @param {number} sizeY
  */
 function grid(sizeX, sizeY) {
-  _ctx.save();
-  _ctx.beginPath();
+  __2djs.ctx.save();
+  __2djs.ctx.beginPath();
 
   for (let x = 0; x < width / sizeX; x++) {
     for (let y = 0; y < height / sizeY; y++) {
-      _ctx.moveTo(0, y * sizeY);
-      _ctx.lineTo(width, y * sizeY);
+      __2djs.ctx.moveTo(0, y * sizeY);
+      __2djs.ctx.lineTo(width, y * sizeY);
     }
-    _ctx.moveTo(x * sizeX, 0);
-    _ctx.lineTo(x * sizeX, height);
+    __2djs.ctx.moveTo(x * sizeX, 0);
+    __2djs.ctx.lineTo(x * sizeX, height);
   }
 
-  _ctx.stroke();
-  _ctx.restore();
+  __2djs.ctx.stroke();
+  __2djs.ctx.restore();
 }
 
 /**
@@ -562,13 +564,13 @@ function image(image, x, y, width, height) {
     return;
   }
 
-  _ctx.save();
+  __2djs.ctx.save();
 
-  _ctx.translate(x + (width ?? image.width) / 2, y + (height ?? image.height) / 2);
-  _ctx.rotate(rotation);
-  _ctx.drawImage(image, -(width ?? image.width) / 2, -(height ?? image.height) / 2, width ?? image.width, height ?? image.height);
+  __2djs.ctx.translate(x + (width ?? image.width) / 2, y + (height ?? image.height) / 2);
+  __2djs.ctx.rotate(rotation);
+  __2djs.ctx.drawImage(image, -(width ?? image.width) / 2, -(height ?? image.height) / 2, width ?? image.width, height ?? image.height);
 
-  _ctx.restore();
+  __2djs.ctx.restore();
 }
 
 /**
@@ -576,9 +578,9 @@ function image(image, x, y, width, height) {
  */
 function angleMode(mode) {
   if (mode === DEGREES) {
-    _angleMode = Math.PI / 180;
+    __2djs.angleMode = Math.PI / 180;
   } else if (mode === RADIANS) {
-    _angleMode = 1;
+    __2djs.angleMode = 1;
   }
 }
 
@@ -597,7 +599,7 @@ function angleMode(mode) {
  * rotate(-90);
  */
 function rotate(degrees) {
-  rotation = degrees * _angleMode;
+  rotation = degrees * __2djs.angleMode;
 }
 
 /**
