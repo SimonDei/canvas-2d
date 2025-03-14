@@ -1,70 +1,85 @@
-const flowers = [];
-let img = null;
-let bitmap = null;
-let rot1 = 0;
+const startLine = 30;
+const finishLine = 400;
+
+const spacing = 20;
+const segmentSize = 25;
+const eyeSize = 7;
+
+const numCaterpillars = 3;
+const caterpillarEnds = [];
+
+let isRunning = false;
 
 function setup() {
-  createCanvas(1000, 1000 * 9 / 16);
+  createCanvas(500, 500);
 
-  img = loadImage('./mushroom.png');
+  frameRate(3);
+  textAlign(CENTER);
 
-  for (let i = 0; i < 6; i++) {
-    flowers.push({
-      x: random(50, width - 50),
-      y: random(50, height - 50),
-      size: random(25, 50),
-      pedals: random([4, 5, 6, 8]),
-      color: random([RED, GRAY, ORANGE, YELLOW, BLUE, TEAL, PURPLE, PINK])
-    });
+  for (let i = 0; i < numCaterpillars; i++) {
+    caterpillarEnds.push(startLine);
+  }
+}
+
+function drawCaterpillar(x, y, segments) {
+  for (let i = 0; i < segments; i++) {
+    fill(MAGENTA);
+    stroke(BLACK);
+    lineWidth(1);
+    circle(x, y, segmentSize);
+
+    x += spacing;
   }
 
-  bitmap = new DrawImage(100, 100);
-  for (let y = 0; y < 100; y++) {
-    for (let x = 0; x < 100; x++) {
-      bitmap.set(x, y, random([GRAY, ORANGE, YELLOW, BLUE, TEAL, PURPLE, PINK]));
-    }
+  fill(BLACK);
+  stroke(WHITE);
+  lineWidth(3);
+  circle(x, y - eyeSize * 2, eyeSize);
+  circle(x - eyeSize * 2, y - eyeSize * 2, eyeSize);
+}
+
+function drawCaterpillars() {
+  for (let i = 0; i < numCaterpillars; i++) {
+    const padding = height / numCaterpillars;
+    const y = (i + 0.5) * padding;
+
+    const crawl = random(3, 5);
+
+    drawCaterpillar(caterpillarEnds[i], y, crawl);
   }
+}
 
-  bitmap.scale(3);
-
-  bitmap.update();
+function moveCaterpillars() {
+  for (let i = 0; i < numCaterpillars; i++) {
+    const move = random(5, 30);
+    caterpillarEnds[i] += move;
+  }
 }
 
 function draw() {
-  background(BLACK);
+  background(BROWN);
 
   noStroke();
 
-  for (const flower of flowers) {
-    fill(flower.color);
+  fill(BLACK);
+  rect(startLine, 0, 5, height);
 
-    for (let i = 0; i < 360 / flower.pedals; i++) {
-      rotate(360 / flower.pedals * i);
-      ellipse(flower.x, flower.y, flower.size, flower.size / 2);
-    }
-
-    fill(GREEN);
-    circle(flower.x, flower.y, 10);
+  fill(LIME);
+  rect(finishLine, 0, 20, height);
+  
+  if (isRunning) {
+    moveCaterpillars();
   }
 
-  rot1 += deltaTime * 0.5;
-  rotate(rot1);
+  drawCaterpillars();
 
-  bitmap.draw(200 + sin(frameCount * 0.04) * 100, 200 + cos(frameCount * 0.04) * 100);
+  circX += spacing;
+
+  if (circX > finishLine) {
+    stopDraw();
+  }
 }
 
 function mouseClicked() {
-  flowers.push({
-    x: mouseX,
-    y: mouseY,
-    size: random(25, 50),
-    pedals: random([4, 5, 6, 8]),
-    color: random([RED, GRAY, ORANGE, YELLOW, BLUE, TEAL, PURPLE, PINK])
-  });
-}
-
-function mouseMoved() {
-  if (mouseX > width / 2) {
-    text('HALLO', 50, 50);
-  }
+  isRunning = true;
 }
