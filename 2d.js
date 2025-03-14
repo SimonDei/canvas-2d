@@ -76,8 +76,8 @@ class Vector3 {
  * Außerdem bietet die Klasse eine Methode, um die Farbe als `rgb()`-String darzustellen, der in {@link fill} oder {@link stroke} verwendet werden kann.
  *
  * @example
- * // Erstelle eine neue Farbe mit den RGB-Werten 100 % (Rot), 50 % (Grün), und 50 % (Blau)
- * const color = new Color(100, 50, 45);
+ * // Erstelle eine neue Farbe mit den RGB-Werten 100 % (Rot), 50 % (Grün), und 45 % (Blau)
+ * const color = new Color(255, 128, 114);
  *
  * // Gibt die Farbe als rgb()-String zurück
  * console.log(color.toString());  // rgb(255, 128, 114)
@@ -86,12 +86,12 @@ class Color {
   /**
    * Erzeugt eine neue Instanz der `Color`-Klasse.
    *
-   * @param {number} red - Der Rotwert der Farbe (zwischen 0 und 100).
-   * @param {number} green - Der Grünwert der Farbe (zwischen 0 und 100).
-   * @param {number} blue - Der Blauwert der Farbe (zwischen 0 und 100).
-   * @param {number} [alpha=100] - Der Alphawert der Farbe (zwischen 0 und 100, standardmäßig 100).
+   * @param {number} red - Der Rotwert der Farbe (zwischen 0 und 255).
+   * @param {number} green - Der Grünwert der Farbe (zwischen 0 und 255).
+   * @param {number} blue - Der Blauwert der Farbe (zwischen 0 und 255).
+   * @param {number} [alpha=255] - Der Alphawert der Farbe (zwischen 0 und 255, standardmäßig 255).
    */
-  constructor(red, green, blue, alpha = 100) {
+  constructor(red, green, blue, alpha = 255) {
     this.red = red;
     this.green = green;
     this.blue = blue;
@@ -101,12 +101,12 @@ class Color {
   /**
    * Gibt die Farbe als CSS-kompatiblen `rgb()`-String zurück.
    *
-   * Der `toString()`-Methode gibt die RGB-Werte zurück, wobei jeder Wert mit 2.55 multipliziert wird, um den Bereich von 0 bis 255 zu erreichen (für CSS).
+   * Der `toString()`-Methode gibt die RGB-Werte zurück.
    *
    * @returns {string} - Der `rgb()`-String, der die Farbe darstellt, z. B. `rgb(255, 255, 255)`.
    */
   toString() {
-    return `rgba(${this.red * 2.55}, ${this.green * 2.55}, ${this.blue * 2.55}, ${this.alpha * 2.55})`;
+    return `rgba(${this.red}, ${this.green}, ${this.blue}, ${this.alpha})`;
   }
 }
 
@@ -202,6 +202,8 @@ class DrawImage {
   }
 }
 
+//#region Globale Variablen
+
 /**
  * Der Wert für den Gradmaß (Degrees) bei der Einstellung des Winkelmaßes.
  *
@@ -231,6 +233,48 @@ const DEGREES = 1;
  * angleMode(RADIANS);
  */
 const RADIANS = 2;
+
+/**
+ * Die Konstante für die linken Textausrichtung.
+ *
+ * Diese Konstante wird verwendet, um den Text am linken Rand auszurichten.
+ * 
+ * @constant {string} LEFT - Der Wert für die linke Textausrichtung.
+ * @see {@link textAlign}
+ *
+ * @example
+ * // Setzt die Textausrichtung auf links
+ * textAlign(LEFT);
+ */
+const LEFT = 'left';
+
+/**
+ * Die Konstante für die mittige Textausrichtung.
+ *
+ * Diese Konstante wird verwendet, um den Text horizontal in der Mitte auszurichten.
+ * 
+ * @constant {string} CENTER - Der Wert für die mittige Textausrichtung.
+ * @see {@link textAlign}
+ *
+ * @example
+ * // Setzt die Textausrichtung auf die Mitte
+ * textAlign(CENTER);
+ */
+const CENTER = 'center';
+
+/**
+ * Die Konstante für die rechte Textausrichtung.
+ *
+ * Diese Konstante wird verwendet, um den Text horizontal am rechten Rand auszurichten.
+ * 
+ * @constant {string} RIGHT - Der Wert für die rechte Textausrichtung.
+ * @see {@link textAlign}
+ *
+ * @example
+ * // Setzt die Textausrichtung auf rechts
+ * textAlign(RIGHT);
+ */
+const RIGHT = 'right';
 
 /**
  * Ein Viertel der Kreiszahl Pi (π/4), entspricht 45 Grad in Bogenmaß.
@@ -455,15 +499,18 @@ let mouseY = 0;
  */
 let mouseIsPressed = false;
 
+//#endregion
+
 //#region Farbkonstanten
 
 /**
  * Die Farbe Schwarz, erstellt mit der Funktion `makeColor`.
  *
  * Diese Konstante repräsentiert eine schwarze Farbe, die mit den RGB-Werten erstellt wurde:
- * - Rot: 0%
- * - Grün: 0%
- * - Blau: 0%
+ * - Rot: 0
+ * - Grün: 0
+ * - Blau: 0
+ * 
  * Der Alphawert (Transparenz) ist standardmäßig auf 100% (volle Deckkraft) gesetzt.
  *
  * @constant {Color} BLACK - Eine schwarze Farbe, die für Zeichnungen oder als Farbanwendung verwendet werden kann.
@@ -478,9 +525,10 @@ const BLACK = makeColor(0, 0, 0);
  * Die Farbe Weiß, erstellt mit der Funktion `makeColor`.
  *
  * Diese Konstante repräsentiert eine weiße Farbe, die mit den RGB-Werten erstellt wurde:
- * - Rot: 100%
- * - Grün: 100%
- * - Blau: 100%
+ * - Rot: 255
+ * - Grün: 255
+ * - Blau: 255
+ * 
  * Der Alphawert (Transparenz) ist standardmäßig auf 100% (volle Deckkraft) gesetzt.
  *
  * @constant {Color} WHITE - Eine weiße Farbe, die für Zeichnungen oder als Farbanwendung verwendet werden kann.
@@ -489,15 +537,16 @@ const BLACK = makeColor(0, 0, 0);
  * // Verwendet die Konstante WHITE, um eine Linie in Weiß zu zeichnen
  * stroke(WHITE);
  */
-const WHITE = makeColor(100, 100, 100);
+const WHITE = makeColor(255, 255, 255);
 
 /**
  * Die Farbe Grau, erstellt mit der Funktion `makeColor`.
  *
  * Diese Konstante repräsentiert eine graue Farbe, die mit den RGB-Werten erstellt wurde:
- * - Rot: 53,7%
- * - Grün: 53,7%
- * - Blau: 53,7%
+ * - Rot: 137
+ * - Grün: 137
+ * - Blau: 137
+ * 
  * Der Alphawert (Transparenz) ist standardmäßig auf 100% (volle Deckkraft) gesetzt.
  *
  * @constant {Color} GRAY - Eine graue Farbe, die für Zeichnungen oder als Farbanwendung verwendet werden kann.
@@ -506,15 +555,16 @@ const WHITE = makeColor(100, 100, 100);
  * // Verwendet die Konstante GRAY, um eine Linie in Grau zu zeichnen
  * stroke(GRAY);
  */
-const GRAY = makeColor(53.7, 53.7, 53.7);
+const GRAY = makeColor(137, 137, 137);
 
 /**
  * Die Farbe Hellgrau, erstellt mit der Funktion `makeColor`.
  *
  * Diese Konstante repräsentiert eine hellgraue Farbe, die mit den RGB-Werten erstellt wurde:
- * - Rot: 82,7%
- * - Grün: 82,7%
- * - Blau: 82,7%
+ * - Rot: 211
+ * - Grün: 211
+ * - Blau: 211
+ * 
  * Der Alphawert (Transparenz) ist standardmäßig auf 100% (volle Deckkraft) gesetzt.
  *
  * @constant {Color} LIGHTGRAY - Eine hellgraue Farbe, die für Zeichnungen oder als Farbanwendung verwendet werden kann.
@@ -523,15 +573,16 @@ const GRAY = makeColor(53.7, 53.7, 53.7);
  * // Verwendet die Konstante LIGHTGRAY, um eine Linie in Hellgrau zu zeichnen
  * stroke(LIGHTGRAY);
  */
-const LIGHTGRAY = makeColor(82.7, 82.7, 82.7);
+const LIGHTGRAY = makeColor(211, 211, 211);
 
 /**
  * Die Farbe Dunkelgrau, erstellt mit der Funktion `makeColor`.
  *
  * Diese Konstante repräsentiert eine dunkelgraue Farbe, die mit den RGB-Werten erstellt wurde:
- * - Rot: 31%
- * - Grün: 31%
- * - Blau: 31%
+ * - Rot: 80
+ * - Grün: 80
+ * - Blau: 80
+ * 
  * Der Alphawert (Transparenz) ist standardmäßig auf 100% (volle Deckkraft) gesetzt.
  *
  * @constant {Color} DARKGRAY - Eine dunkelgraue Farbe, die für Zeichnungen oder als Farbanwendung verwendet werden kann.
@@ -540,15 +591,16 @@ const LIGHTGRAY = makeColor(82.7, 82.7, 82.7);
  * // Verwendet die Konstante DARKGRAY, um eine Linie in Dunkelgrau zu zeichnen
  * stroke(DARKGRAY);
  */
-const DARKGRAY = makeColor(31, 31, 31);
+const DARKGRAY = makeColor(80, 80, 80);
 
 /**
  * Die Farbe Rot, erstellt mit der Funktion `makeColor`.
  *
  * Diese Konstante repräsentiert eine rote Farbe, die mit den RGB-Werten erstellt wurde:
- * - Rot: 100%
- * - Grün: 17,3%
- * - Blau: 17,3%
+ * - Rot: 255
+ * - Grün: 44
+ * - Blau: 44
+ * 
  * Der Alphawert (Transparenz) ist standardmäßig auf 100% (volle Deckkraft) gesetzt.
  *
  * @constant {Color} RED - Eine rote Farbe, die für Zeichnungen oder als Farbanwendung verwendet werden kann.
@@ -557,15 +609,16 @@ const DARKGRAY = makeColor(31, 31, 31);
  * // Verwendet die Konstante RED, um eine Linie in Rot zu zeichnen
  * stroke(RED);
  */
-const RED = makeColor(100, 17.3, 17.3);
+const RED = makeColor(255, 44, 44);
 
 /**
  * Die Farbe Grün, erstellt mit der Funktion `makeColor`.
  *
  * Diese Konstante repräsentiert eine grüne Farbe, die mit den RGB-Werten erstellt wurde:
- * - Rot: 0%
- * - Grün: 50,2%
- * - Blau: 0%
+ * - Rot: 0
+ * - Grün: 128
+ * - Blau: 0
+ * 
  * Der Alphawert (Transparenz) ist standardmäßig auf 100% (volle Deckkraft) gesetzt.
  *
  * @constant {Color} GREEN - Eine grüne Farbe, die für Zeichnungen oder als Farbanwendung verwendet werden kann.
@@ -574,15 +627,16 @@ const RED = makeColor(100, 17.3, 17.3);
  * // Verwendet die Konstante GREEN, um eine Linie in Grün zu zeichnen
  * stroke(GREEN);
  */
-const GREEN = makeColor(0, 50.2, 0);
+const GREEN = makeColor(0, 128, 0);
 
 /**
  * Die Farbe Limette (Lime), erstellt mit der Funktion `makeColor`.
  *
  * Diese Konstante repräsentiert eine limettengrüne Farbe, die mit den RGB-Werten erstellt wurde:
- * - Rot: 53,7%
- * - Grün: 95,3%
- * - Blau: 21,2%
+ * - Rot: 137
+ * - Grün: 243
+ * - Blau: 54
+ * 
  * Der Alphawert (Transparenz) ist standardmäßig auf 100% (volle Deckkraft) gesetzt.
  *
  * @constant {Color} LIME - Eine limettengrüne Farbe, die für Zeichnungen oder als Farbanwendung verwendet werden kann.
@@ -591,15 +645,16 @@ const GREEN = makeColor(0, 50.2, 0);
  * // Verwendet die Konstante LIME, um eine Linie in Limettengrün zu zeichnen
  * stroke(LIME);
  */
-const LIME = makeColor(53.7, 95.3, 21.2);
+const LIME = makeColor(137, 243, 54);
 
 /**
  * Die Farbe Dunkelgrün, erstellt mit der Funktion `makeColor`.
  *
  * Diese Konstante repräsentiert eine dunkelgrüne Farbe, die mit den RGB-Werten erstellt wurde:
- * - Rot: 2,4%
- * - Grün: 25,1%
- * - Blau: 16,9%
+ * - Rot: 6
+ * - Grün: 64
+ * - Blau: 43
+ * 
  * Der Alphawert (Transparenz) ist standardmäßig auf 100% (volle Deckkraft) gesetzt.
  *
  * @constant {Color} DARKGREEN - Eine dunkelgrüne Farbe, die für Zeichnungen oder als Farbanwendung verwendet werden kann.
@@ -608,15 +663,16 @@ const LIME = makeColor(53.7, 95.3, 21.2);
  * // Verwendet die Konstante DARKGREEN, um eine Linie in Dunkelgrün zu zeichnen
  * stroke(DARKGREEN);
  */
-const DARKGREEN = makeColor(2.4, 25.1, 16.9);
+const DARKGREEN = makeColor(6, 64, 43);
 
 /**
  * Die Farbe Kastanienbraun (Maroon), erstellt mit der Funktion `makeColor`.
  *
  * Diese Konstante repräsentiert eine kastanienbraune Farbe, die mit den RGB-Werten erstellt wurde:
- * - Rot: 33,3%
- * - Grün: 0%
- * - Blau: 0%
+ * - Rot: 85
+ * - Grün: 0
+ * - Blau: 0
+ * 
  * Der Alphawert (Transparenz) ist standardmäßig auf 100% (volle Deckkraft) gesetzt.
  *
  * @constant {Color} MAROON - Eine kastanienbraune Farbe, die für Zeichnungen oder als Farbanwendung verwendet werden kann.
@@ -625,15 +681,16 @@ const DARKGREEN = makeColor(2.4, 25.1, 16.9);
  * // Verwendet die Konstante MAROON, um eine Linie in Kastanienbraun zu zeichnen
  * stroke(MAROON);
  */
-const MAROON = makeColor(33.3, 0, 0);
+const MAROON = makeColor(85, 0, 0);
 
 /**
  * Die Farbe Blau, erstellt mit der Funktion `makeColor`.
  *
  * Diese Konstante repräsentiert eine reine blaue Farbe, die mit den RGB-Werten erstellt wurde:
- * - Rot: 0%
- * - Grün: 0%
- * - Blau: 100%
+ * - Rot: 0
+ * - Grün: 0
+ * - Blau: 100
+ * 
  * Der Alphawert (Transparenz) ist standardmäßig auf 100% (volle Deckkraft) gesetzt.
  *
  * @constant {Color} BLUE - Eine reine blaue Farbe, die für Zeichnungen oder als Farbanwendung verwendet werden kann.
@@ -642,15 +699,16 @@ const MAROON = makeColor(33.3, 0, 0);
  * // Verwendet die Konstante BLUE, um eine Linie in Blau zu zeichnen
  * stroke(BLUE);
  */
-const BLUE = makeColor(0, 0, 100);
+const BLUE = makeColor(0, 0, 255);
 
 /**
  * Die Farbe Himmelblau, erstellt mit der Funktion `makeColor`.
  *
  * Diese Konstante repräsentiert eine himmelblaue Farbe, die mit den RGB-Werten erstellt wurde:
- * - Rot: 51%
- * - Grün: 78,4%
- * - Blau: 89,8%
+ * - Rot: 139
+ * - Grün: 200
+ * - Blau: 229
+ * 
  * Der Alphawert (Transparenz) ist standardmäßig auf 100% (volle Deckkraft) gesetzt.
  *
  * @constant {Color} SKYBLUE - Eine himmelblaue Farbe, die für Zeichnungen oder als Farbanwendung verwendet werden kann.
@@ -659,15 +717,16 @@ const BLUE = makeColor(0, 0, 100);
  * // Verwendet die Konstante SKYBLUE, um eine Linie in Himmelblau zu zeichnen
  * stroke(SKYBLUE);
  */
-const SKYBLUE = makeColor(51, 78.4, 89.8);
+const SKYBLUE = makeColor(130, 200, 229);
 
 /**
  * Die Farbe Dunkelblau, erstellt mit der Funktion `makeColor`.
  *
  * Diese Konstante repräsentiert eine dunkelblaue Farbe, die mit den RGB-Werten erstellt wurde:
- * - Rot: 6,7%
- * - Grün: 6,7%
- * - Blau: 51,8%
+ * - Rot: 17
+ * - Grün: 17
+ * - Blau: 132
+ * 
  * Der Alphawert (Transparenz) ist standardmäßig auf 100% (volle Deckkraft) gesetzt.
  *
  * @constant {Color} DARKBLUE - Eine dunkelblaue Farbe, die für Zeichnungen oder als Farbanwendung verwendet werden kann.
@@ -676,15 +735,16 @@ const SKYBLUE = makeColor(51, 78.4, 89.8);
  * // Verwendet die Konstante DARKBLUE, um eine Linie in Dunkelblau zu zeichnen
  * stroke(DARKBLUE);
  */
-const DARKBLUE = makeColor(6.7, 6.7, 51.8);
+const DARKBLUE = makeColor(17, 17, 132);
 
 /**
  * Die Farbe Gelb, erstellt mit der Funktion `makeColor`.
  *
  * Diese Konstante repräsentiert eine gelbe Farbe, die mit den RGB-Werten erstellt wurde:
- * - Rot: 100%
- * - Grün: 87,1%
- * - Blau: 12,9%
+ * - Rot: 255
+ * - Grün: 222
+ * - Blau: 33
+ * 
  * Der Alphawert (Transparenz) ist standardmäßig auf 100% (volle Deckkraft) gesetzt.
  *
  * @constant {Color} YELLOW - Eine gelbe Farbe, die für Zeichnungen oder als Farbanwendung verwendet werden kann.
@@ -693,15 +753,16 @@ const DARKBLUE = makeColor(6.7, 6.7, 51.8);
  * // Verwendet die Konstante YELLOW, um eine Linie in Gelb zu zeichnen
  * stroke(YELLOW);
  */
-const YELLOW = makeColor(100, 87.1, 12.9);
+const YELLOW = makeColor(255, 222, 33);
 
 /**
  * Die Farbe Orange, erstellt mit der Funktion `makeColor`.
  *
  * Diese Konstante repräsentiert eine orange Farbe, die mit den RGB-Werten erstellt wurde:
- * - Rot: 100%
- * - Grün: 64,7%
- * - Blau: 0%
+ * - Rot: 255
+ * - Grün: 165
+ * - Blau: 0
+ * 
  * Der Alphawert (Transparenz) ist standardmäßig auf 100% (volle Deckkraft) gesetzt.
  *
  * @constant {Color} ORANGE - Eine orange Farbe, die für Zeichnungen oder als Farbanwendung verwendet werden kann.
@@ -710,15 +771,16 @@ const YELLOW = makeColor(100, 87.1, 12.9);
  * // Verwendet die Konstante ORANGE, um eine Linie in Orange zu zeichnen
  * stroke(ORANGE);
  */
-const ORANGE = makeColor(100, 64.7, 0);
+const ORANGE = makeColor(255, 165, 0);
 
 /**
  * Die Farbe Teal (Türkis), erstellt mit der Funktion `makeColor`.
  *
  * Diese Konstante repräsentiert eine teal (türkise) Farbe, die mit den RGB-Werten erstellt wurde:
- * - Rot: 2,4%
- * - Grün: 58%
- * - Blau: 58%
+ * - Rot: 6
+ * - Grün: 148
+ * - Blau: 148
+ * 
  * Der Alphawert (Transparenz) ist standardmäßig auf 100% (volle Deckkraft) gesetzt.
  *
  * @constant {Color} TEAL - Eine teal (türkise) Farbe, die für Zeichnungen oder als Farbanwendung verwendet werden kann.
@@ -727,15 +789,16 @@ const ORANGE = makeColor(100, 64.7, 0);
  * // Verwendet die Konstante TEAL, um eine Linie in Teal zu zeichnen
  * stroke(TEAL);
  */
-const TEAL = makeColor(2.4, 58, 58);
+const TEAL = makeColor(6, 148, 148);
 
 /**
  * Die Farbe Lila, erstellt mit der Funktion `makeColor`.
  *
  * Diese Konstante repräsentiert eine lila Farbe, die mit den RGB-Werten erstellt wurde:
- * - Rot: 61,6%
- * - Grün: 0%
- * - Blau: 100%
+ * - Rot: 157
+ * - Grün: 0
+ * - Blau: 255
+ * 
  * Der Alphawert (Transparenz) ist standardmäßig auf 100% (volle Deckkraft) gesetzt.
  *
  * @constant {Color} PURPLE - Eine lila Farbe, die für Zeichnungen oder als Farbanwendung verwendet werden kann.
@@ -744,15 +807,16 @@ const TEAL = makeColor(2.4, 58, 58);
  * // Verwendet die Konstante PURPLE, um eine Linie in Lila zu zeichnen
  * stroke(PURPLE);
  */
-const PURPLE = makeColor(61.6, 0, 100);
+const PURPLE = makeColor(157, 0, 255);
 
 /**
  * Die Farbe Violett, erstellt mit der Funktion `makeColor`.
  *
  * Diese Konstante repräsentiert eine violette Farbe, die mit den RGB-Werten erstellt wurde:
- * - Rot: 49,8%
- * - Grün: 0%
- * - Blau: 100%
+ * - Rot: 127
+ * - Grün: 0
+ * - Blau: 255
+ * 
  * Der Alphawert (Transparenz) ist standardmäßig auf 100% (volle Deckkraft) gesetzt.
  *
  * @constant {Color} VIOLET - Eine violette Farbe, die für Zeichnungen oder als Farbanwendung verwendet werden kann.
@@ -761,15 +825,16 @@ const PURPLE = makeColor(61.6, 0, 100);
  * // Verwendet die Konstante VIOLET, um eine Linie in Violett zu zeichnen
  * stroke(VIOLET);
  */
-const VIOLET = makeColor(49.8, 0, 100);
+const VIOLET = makeColor(127, 0, 255);
 
 /**
  * Die Farbe Magenta, erstellt mit der Funktion `makeColor`.
  *
  * Diese Konstante repräsentiert eine magenta Farbe, die mit den RGB-Werten erstellt wurde:
- * - Rot: 99,2%
- * - Grün: 23,9%
- * - Blau: 71%
+ * - Rot: 253
+ * - Grün: 61
+ * - Blau: 181
+ * 
  * Der Alphawert (Transparenz) ist standardmäßig auf 100% (volle Deckkraft) gesetzt.
  *
  * @constant {Color} MAGENTA - Eine magenta Farbe, die für Zeichnungen oder als Farbanwendung verwendet werden kann.
@@ -778,15 +843,16 @@ const VIOLET = makeColor(49.8, 0, 100);
  * // Verwendet die Konstante MAGENTA, um eine Linie in Magenta zu zeichnen
  * stroke(MAGENTA);
  */
-const MAGENTA = makeColor(99.2, 23.9, 71);
+const MAGENTA = makeColor(253, 61, 181);
 
 /**
  * Die Farbe Dunkellila, erstellt mit der Funktion `makeColor`.
  *
  * Diese Konstante repräsentiert eine dunkle lila Farbe, die mit den RGB-Werten erstellt wurde:
- * - Rot: 20,4%
- * - Grün: 8,2%
- * - Blau: 22,4%
+ * - Rot: 52
+ * - Grün: 21
+ * - Blau: 57
+ * 
  * Der Alphawert (Transparenz) ist standardmäßig auf 100% (volle Deckkraft) gesetzt.
  *
  * @constant {Color} DARKPURPLE - Eine dunkle lila Farbe, die für Zeichnungen oder als Farbanwendung verwendet werden kann.
@@ -795,15 +861,16 @@ const MAGENTA = makeColor(99.2, 23.9, 71);
  * // Verwendet die Konstante DARKPURPLE, um eine Linie in Dunkellila zu zeichnen
  * stroke(DARKPURPLE);
  */
-const DARKPURPLE = makeColor(20.4, 8.2, 22.4);
+const DARKPURPLE = makeColor(52, 21, 57);
 
 /**
  * Die Farbe Rosa, erstellt mit der Funktion `makeColor`.
  *
  * Diese Konstante repräsentiert eine rosa Farbe, die mit den RGB-Werten erstellt wurde:
- * - Rot: 100%
- * - Grün: 55,3%
- * - Blau: 63,1%
+ * - Rot: 255
+ * - Grün: 141
+ * - Blau: 161
+ * 
  * Der Alphawert (Transparenz) ist standardmäßig auf 100% (volle Deckkraft) gesetzt.
  *
  * @constant {Color} PINK - Eine rosa Farbe, die für Zeichnungen oder als Farbanwendung verwendet werden kann.
@@ -812,15 +879,16 @@ const DARKPURPLE = makeColor(20.4, 8.2, 22.4);
  * // Verwendet die Konstante PINK, um eine Linie in Pink zu zeichnen
  * stroke(PINK);
  */
-const PINK = makeColor(100, 55.3, 63.1);
+const PINK = makeColor(255, 141, 161);
 
 /**
  * Die Farbe Braun, erstellt mit der Funktion `makeColor`.
  *
  * Diese Konstante repräsentiert eine braune Farbe, die mit den RGB-Werten erstellt wurde:
- * - Rot: 53,7%
- * - Grün: 31,8%
- * - Blau: 16,1%
+ * - Rot: 137
+ * - Grün: 81
+ * - Blau: 41
+ * 
  * Der Alphawert (Transparenz) ist standardmäßig auf 100% (volle Deckkraft) gesetzt.
  *
  * @constant {Color} BROWN - Eine braune Farbe, die für Zeichnungen oder als Farbanwendung verwendet werden kann.
@@ -829,7 +897,7 @@ const PINK = makeColor(100, 55.3, 63.1);
  * // Verwendet die Konstante BROWN, um eine Linie in Braun zu zeichnen
  * stroke(BROWN);
  */
-const BROWN = makeColor(53.7, 31.8, 16.1);
+const BROWN = makeColor(137, 81, 41);
 
 //#endregion Farbkonstanten
 
@@ -837,24 +905,24 @@ const BROWN = makeColor(53.7, 31.8, 16.1);
  * Erzeugt eine RGB-Farbe aus Prozentwerten für Rot, Grün und Blau und optionalem Alphawert.
  * 
  * Diese Funktion erstellt eine Farbe basierend auf den Prozentwerten für Rot, Grün und Blau.
- * Der Alphawert (Transparenz) kann ebenfalls als Prozentwert angegeben werden und ist standardmäßig auf 100% (vollständig undurchsichtig) gesetzt.
+ * Der Alphawert (Transparenz) kann ebenfalls als Prozentwert angegeben werden und ist standardmäßig auf 255 (vollständig undurchsichtig) gesetzt.
  * Die zurückgegebene Farbe wird als `Color`-Objekt dargestellt, das die RGB-Werte sowie den Alpha-Wert enthält.
  *
- * @param {number} red - Der Rotanteil der Farbe in Prozent (0 bis 100).
- * @param {number} green - Der Grünanteil der Farbe in Prozent (0 bis 100).
- * @param {number} blue - Der Blauanteil der Farbe in Prozent (0 bis 100).
- * @param {number} [alpha=100] - Der Alphawert der Farbe in Prozent (0 bis 100, standardmäßig 100).
+ * @param {number} red - Der Rotanteil der Farbe (0 bis 255).
+ * @param {number} green - Der Grünanteil der Farbe (0 bis 255).
+ * @param {number} blue - Der Blauanteil der Farbe (0 bis 255).
+ * @param {number} [alpha=255] - Der Alphawert der Farbe (0 bis 255, standardmäßig 255).
  * @returns {Color} Ein `Color`-Objekt, das die RGB-Werte und den Alpha-Wert der Farbe enthält.
  *
  * @example
  * // Erstellt ein hellblaues Farbwert
- * const color = makeColor(0, 50, 100, 100);
+ * const color = makeColor(0, 128, 255, 255);
  *
  * @example
  * // Erstellt eine mittlere Graufarbe
- * const gray = makeColor(50, 50, 50);
+ * const gray = makeColor(128, 128, 128);
  */
-function makeColor(red, green, blue, alpha = 100) {
+function makeColor(red, green, blue, alpha = 255) {
   return new Color(red, green, blue, alpha);
 }
 
@@ -897,7 +965,11 @@ function createCanvas(w, h) {
 
   canvas = __2djs.canvas;
 
-  __2djs.canvas.addEventListener('click', () => mouseClicked?.());
+  __2djs.canvas.addEventListener('click', () => {
+    if (Object.hasOwn(window, 'mouseClicked')) {
+      mouseClicked();
+    }
+  });
 
   __2djs.canvas.addEventListener('mousemove', function(event) {
     mouseX = event.x - __2djs.canvas.getBoundingClientRect().x;
@@ -919,8 +991,8 @@ function createCanvas(w, h) {
   __2djs.intervalCallback = () => {
     const startTime = performance.now();
     draw?.();
-    if (__2djs.mouseMoved) {
-      mouseMoved?.();
+    if (__2djs.mouseMoved && Object.hasOwn(window, 'mouseMoved')) {
+      mouseMoved();
     }
     frameCount++;
     deltaTime = performance.now() - startTime;
@@ -1186,6 +1258,7 @@ function triangle(x1, y1, x2, y2, x3, y3) {
   __2djs.ctx.lineTo(x2, y2);
   __2djs.ctx.lineTo(x3, y3);
   __2djs.ctx.lineTo(x1, y1);
+  __2djs.ctx.fill();
   __2djs.ctx.stroke();
 
   __2djs.ctx.restore();
@@ -1242,8 +1315,9 @@ function rect(x, y, width, height) {
   __2djs.ctx.beginPath();
   __2djs.ctx.rect(0, 0, 1, 1);
   __2djs.ctx.fill();
+  __2djs.ctx.restore();
   __2djs.ctx.stroke();
-
+  
   __2djs.ctx.restore();
 }
 
@@ -1310,6 +1384,31 @@ function ellipse(x, y, radiusX, radiusY) {
  */
 function textSize(size) {
   __2djs.textSize = size;
+}
+
+/**
+ * Legt die Textausrichtung auf der Zeichenfläche fest.
+ *
+ * Diese Funktion ändert die Textausrichtung des 2D-Kontexts. Sie kann verwendet werden, um 
+ * die Ausrichtung von Texten zu steuern (z. B. links, mittig, rechts).
+ * 
+ * @param {string} alignment - Die gewünschte Ausrichtung des Textes. Kann eine der folgenden Werte sein:
+ *   - `LEFT`: Text wird links ausgerichtet.
+ *   - `RIGHT`: Text wird rechts ausgerichtet.
+ *   - `CENTER`: Text wird mittig ausgerichtet.
+ * 
+ * @see {@link LEFT}, {@link RIGHT}, {@link CENTER}
+ * 
+ * @example
+ * // Setzt die Textausrichtung auf die Mitte
+ * textAlign(CENTER);
+ * 
+ * @example
+ * // Setzt die Textausrichtung auf links
+ * textAlign(LEFT);
+ */
+function textAlign(alignment) {
+  __2djs.ctx.textAlign = alignment;
 }
 
 /**
@@ -1499,6 +1598,10 @@ function rotateAdd(degrees) {
     __2djs.rotation = 0;
   }
   __2djs.rotation += degrees;
+}
+
+function stopDraw() {
+  clearInterval(__2djs.intervalId);
 }
 
 /**
