@@ -1,7 +1,9 @@
 class Texture {
   #id;
 
-  constructor() {
+  constructor(image) {
+    this.#id = glGenTexture();
+    this.generate(image)
   }
 
   bind() {
@@ -9,7 +11,6 @@ class Texture {
   }
 
   generate(data) {
-    this.#id = glGenTexture();
     glBindTexture(GL_TEXTURE_2D, this.#id);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, data.width, data.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
