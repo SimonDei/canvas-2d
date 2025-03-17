@@ -21,6 +21,8 @@ const GL_UNSIGNED_BYTE = 0x1401;
 const GL_UNSIGNED_SHORT = 0x1403;
 const GL_FLOAT = 0x1406;
 const GL_TEXTURE_2D = 0x0de1;
+const GL_TEXTURE0 = 0x84c0;
+const GL_TEXTURE1 = 0x84c1;
 const GL_TEXTURE_MIN_FILTER = 0x2801;
 const GL_TEXTURE_MAG_FILTER = 0x2800;
 const GL_NEAREST = 0x2600;
@@ -54,6 +56,10 @@ function glEnable(cap) {
 
 function glDisable(cap) {
   gl.disable(cap);
+}
+
+function glViewport(x, y, width, height) {
+  gl.viewport(x, y, width, height);
 }
 
 function glBlendFunc(sfactor, dfactor) {
@@ -168,6 +174,10 @@ function glUniform3i(location, x, y, z) {
   gl.uniform3i(location, x, y, z);
 }
 
+function glUniform3fv(location, value) {
+  gl.uniform3fv(location, value);
+}
+
 function glUniform4i(location, x, y, z, w) {
   gl.uniform4i(location, x, y, z, w);
 }
@@ -193,7 +203,7 @@ function glGenBuffer() {
 }
 
 function glBindBuffer(target, buffer) {
-  gl.bindBuffer(target, buffer);
+  gl.bindBuffer(target, !buffer ? null : buffer);
 }
 
 function glBufferData(target, data, usage) {
@@ -234,6 +244,10 @@ function glGenTexture() {
 
 function glBindTexture(target, texture) {
   gl.bindTexture(target, !texture ? null : texture);
+}
+
+function glActiveTexture(texture) {
+  gl.activeTexture(texture);
 }
 
 function glTexImage2D(target, level, internalformat, width, height, border, format, type, data) {
