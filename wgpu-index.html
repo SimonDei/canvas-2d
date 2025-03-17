@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Document</title>
+
+  <script src="./src/wgpu-matrix.js"></script>
+  <!-- <script src="2d.js"></script> -->
+  <!-- <script type="module" src="src/index.js"></script> -->
+</head>
+<body style="background-color: #111;">
+  <canvas width="800" height="600"></canvas>
+
+  <script type="module">
+    import Device from './src/device.js';
+    import { XYZW_RGBA_TS, XYZW_TS } from './src/buffer.js';
+
+    const device = new Device();
+    await device.initialize();
+
+    device.setCanvas(document.querySelector('canvas'));
+    await device.createShaderModule('./vertex.wgsl', './fragment.wgsl');
+
+    const image = new Image();
+    image.src = './mushroom.png';
+    await image.decode();
+
+    const vertexBuffer = device.createVertexBuffer(XYZW_TS, new Float32Array([
+      0.0, 0.0, 0, 1,   0, 0,
+      1.0, 1.0, 0, 1,   1, 1,
+      0.0, 1.0, 0, 1,   0, 1,
+      1.0, 0.0, 0, 1,   1, 0
+    ]));
+
+    const indexBuffer = device.createIndexBuffer(new Uint16Array([
+      0, 1, 2,
+      0, 3, 1
+    ]));
+
+    const projection = wgpuMatrix.mat4.ortho(0, 800, 600, 0, 0, 1);
+
+    let rotation = Math.PI / 4;
+
+    const model = new Float32Array([
+      100.0, 100.0,
+      100.0, 100.0,
+      rotation
+    ]);
+
+    const bindGroup = device.createBindGroup();
+    bindGroup.addUniformBinding(0, projection);
+    bindGroup.addUniformBinding(1, model, (2 + 2 + 1) * 4 + 8);
+    bindGroup.addSamplerBinding(2, device.createSampler('linear', 'linear'));
+    bindGroup.addTextureBinding(3, device.createTexture(image));
+    bindGroup.build();
+
+    const pipeline = device.createRenderPipeline(vertexBuffer.getBufferDescriptor());
+
+    setInterval(() => {
+      device.beginPassEncoder();
+
+      device.setPipeline(pipeline);
+      device.setBindGroup();
+      device.setVertexBuffer(vertexBuffer);
+      device.setIndexBuffer(indexBuffer);
+      device.drawIndexed(6);
+
+      device.endPassEncoder();
+      
+      rotation += 0.03;
+      model.set([rotation], 4);
+      bindGroup.update(1, model);
+    }, 1000 / 60);
+  </script>
+</body>
+</html>
