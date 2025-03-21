@@ -12,13 +12,15 @@ const __2djs = {
   /** @type {number} */
   frameRate: 60,
   /** @type {number} */
-  intervalId: null,
-  /** @type {Function} */
-  intervalCallback: null,
+  frameInterval: 1000 / 60,
+  /** @type {boolean} */
+  running: true,
   /** @type {number} */
   rotation: 0,
   /** @type {number} */
   textSize: 20,
+  /** @type {string} */
+  fontName: 'Arial',
   /** @type {number} */
   angleMode: 1,
   /** @type {boolean} */
@@ -49,6 +51,84 @@ class Vector2 {
   constructor(x, y) {
     this.x = x;
     this.y = y;
+  }
+
+  /**
+   * Berechnet die Länge (Betrag) des Vektors.
+   * Der Betrag eines Vektors wird durch die Formel `√(x² + y²)` berechnet.
+   *
+   * @returns {number} - Die Länge des Vektors.
+   *
+   * @example
+   * const vector = new Vector2(3, 4);
+   * console.log(vector.length());  // Gibt 5 zurück (√(3² + 4²) = 5)
+   */
+  length() {
+    return Math.sqrt(this.x * this.x + this.y * this.y);
+  }
+
+  /**
+   * Addiert einen anderen Vektor zu diesem Vektor.
+   *
+   * @param {Vector2} otherVector - Der Vektor, der zu diesem Vektor addiert werden soll.
+   * @returns {Vector2} - Ein neuer Vektor, der die Summe der beiden Vektoren darstellt.
+   *
+   * @example
+   * const vector1 = new Vector2(3, 4);
+   * const vector2 = new Vector2(1, 2);
+   * const result = vector1.add(vector2);
+   * console.log(result);  // Gibt einen Vektor mit den Komponenten (4, 6) zurück
+   */
+  add(otherVector) {
+    return new Vector2(this.x + otherVector.x, this.y + otherVector.y);
+  }
+
+  /**
+   * Subtrahiert einen anderen Vektor von diesem Vektor.
+   *
+   * @param {Vector2} otherVector - Der Vektor, der von diesem Vektor subtrahiert werden soll.
+   * @returns {Vector2} - Ein neuer Vektor, der die Differenz der beiden Vektoren darstellt.
+   *
+   * @example
+   * const vector1 = new Vector2(3, 4);
+   * const vector2 = new Vector2(1, 2);
+   * const result = vector1.subtract(vector2);
+   * console.log(result);  // Gibt einen Vektor mit den Komponenten (2, 2) zurück
+   */
+  subtract(otherVector) {
+    return new Vector2(this.x - otherVector.x, this.y - otherVector.y);
+  }
+
+  /**
+   * Berechnet das Skalarprodukt (Dot-Product) dieses Vektors mit einem anderen Vektor.
+   * Das Skalarprodukt ist eine Möglichkeit, die Ähnlichkeit zwischen zwei Vektoren zu messen.
+   *
+   * @param {Vector2} otherVector - Der Vektor, mit dem das Skalarprodukt berechnet werden soll.
+   * @returns {number} - Das Skalarprodukt der beiden Vektoren.
+   *
+   * @example
+   * const vector1 = new Vector2(1, 2);
+   * const vector2 = new Vector2(3, 4);
+   * console.log(vector1.dot(vector2));  // Gibt 11 zurück (1*3 + 2*4 = 11)
+   */
+  dot(otherVector) {
+    return this.x * otherVector.x + this.y * otherVector.y;
+  }
+
+  /**
+   * Skaliert den Vektor mit einem Skalarwert.
+   * Der Vektor wird mit dem angegebenen Wert multipliziert, um seine Größe zu ändern.
+   *
+   * @param {number} scalar - Der Wert, mit dem der Vektor multipliziert werden soll.
+   * @returns {Vector2} - Ein neuer Vektor, der mit dem Skalarwert multipliziert wurde.
+   *
+   * @example
+   * const vector = new Vector2(2, 3);
+   * const scaledVector = vector.scale(2);
+   * console.log(scaledVector);  // Gibt einen Vektor mit den Komponenten (4, 6) zurück
+   */
+  scale(scalar) {
+    return new Vector2(this.x * scalar, this.y * scalar);
   }
 }
 
@@ -107,11 +187,96 @@ class Color {
   }
 
   /**
-   * Gibt die Farbe als CSS-kompatiblen `rgb()`-String zurück.
+   * Berechnet die Helligkeit der Farbe basierend auf den RGB-Werten.
+   * Helligkeit wird durch die durchschnittliche Intensität der Farben berechnet.
+   *
+   * @returns {number} - Die Helligkeit der Farbe (zwischen 0 und 255).
+   * 
+   * @example
+   * const color = new Color(255, 128, 114);
+   * console.log(color.getBrightness());  // Gibt z. B. 165 zurück
+   */
+  getBrightness() {
+    return Math.round((this.red + this.green + this.blue) / 3);
+  }
+
+  /**
+   * Macht die Farbe heller oder dunkler.
+   * Ein positiver Wert macht die Farbe heller, ein negativer Wert dunkler.
+   *
+   * @param {number} amount - Der Wert, um den die Farbe heller/dunkler gemacht werden soll.
+   *                          Positive Werte machen die Farbe heller, negative Werte dunkler.
+   * @returns {Color} - Eine neue `Color`-Instanz mit der angepassten Helligkeit.
+   *
+   * @example
+   * const color = new Color(100, 100, 100);
+   * const darkerColor = color.adjustBrightness(-30);
+   * console.log(darkerColor.toString());  // Gibt z. B. "rgba(70, 70, 70, 255)" zurück
+   */
+  adjustBrightness(amount) {
+    let newRed = Math.min(255, Math.max(0, this.red + amount));
+    let newGreen = Math.min(255, Math.max(0, this.green + amount));
+    let newBlue = Math.min(255, Math.max(0, this.blue + amount));
+
+    return new Color(newRed, newGreen, newBlue, this.alpha);
+  }
+
+  /**
+   * Gibt die Farbe als Hexadezimalwert zurück.
+   *
+   * @returns {string} - Der Hexadezimalwert der Farbe, z. B. `#ff5733`.
+   *
+   * @example
+   * const color = new Color(255, 87, 51);
+   * console.log(color.toHex());  // Gibt "#ff5733" zurück
+   */
+  toHex() {
+    const toHexComponent = (value) => value.toString(16).padStart(2, '0');
+    return `#${toHexComponent(this.red)}${toHexComponent(this.green)}${toHexComponent(this.blue)}`;
+  }
+
+  /**
+   * Mischt diese Farbe mit einer anderen Farbe.
+   *
+   * @param {Color} otherColor - Die andere Farbe, mit der diese gemischt werden soll.
+   * @returns {Color} - Eine neue `Color`-Instanz, die die Mischung der beiden Farben darstellt.
+   *
+   * @example
+   * const color1 = new Color(255, 0, 0);
+   * const color2 = new Color(0, 0, 255);
+   * const mixedColor = color1.mixWith(color2);
+   * console.log(mixedColor.toString());  // Gibt "rgba(127, 0, 127, 255)" zurück
+   */
+  mixWith(otherColor) {
+    const r = Math.round((this.red + otherColor.red) / 2);
+    const g = Math.round((this.green + otherColor.green) / 2);
+    const b = Math.round((this.blue + otherColor.blue) / 2);
+    return new Color(r, g, b);
+  }
+
+  /**
+   * Invertiert die Farbe und gibt die Komplementärfarbe zurück.
+   *
+   * @returns {Color} - Eine neue `Color`-Instanz mit der invertierten Farbe.
+   *
+   * @example
+   * const color = new Color(255, 0, 0);
+   * const invertedColor = color.invert();
+   * console.log(invertedColor.toString());  // Gibt "rgba(0, 255, 255, 255)" zurück
+   */
+  invert() {
+    const r = 255 - this.red;
+    const g = 255 - this.green;
+    const b = 255 - this.blue;
+    return new Color(r, g, b, this.alpha);
+  }
+
+  /**
+   * Gibt die Farbe als CSS-kompatiblen `rgba()`-String zurück.
    *
    * Der `toString()`-Methode gibt die RGB-Werte zurück.
    *
-   * @returns {string} - Der `rgb()`-String, der die Farbe darstellt, z. B. `rgb(255, 255, 255)`.
+   * @returns {string} - Der `rgba()`-String, der die Farbe darstellt, z. B. `rgba(255, 255, 255, 255)`.
    */
   toString() {
     return `rgba(${this.red}, ${this.green}, ${this.blue}, ${this.alpha})`;
@@ -348,7 +513,7 @@ const TWO_PI = Math.PI * 2;
  * wird in der Regel in einem Animations- oder Spiel-Loop erhöht.
  *
  * @type {number}
- * @default 0
+ * @default 1
  *
  * @example
  * // Erhöht den Frame-Zähler in jedem Animations-Frame
@@ -361,7 +526,7 @@ const TWO_PI = Math.PI * 2;
  * // Berechnet die Zeit, die seit dem Start vergangen ist, basierend auf frameCount
  * const timeElapsed = frameCount * deltaTime;
  */
-let frameCount = 0;
+let frameCount = 1;
 
 /**
  * Die Zeitspanne (in Millisekunden) zwischen zwei aufeinanderfolgenden Frames.
@@ -998,19 +1163,29 @@ function createCanvas(w, h) {
   });
     
   __2djs.ctx = __2djs.canvas.getContext('2d');
-  background(WHITE);
+  background(BLACK);
 
-  __2djs.intervalCallback = () => {
-    const startTime = performance.now();
-    draw?.();
-    if (__2djs.mouseMoved && Object.hasOwn(window, 'mouseMoved')) {
-      mouseMoved();
+  let oldTime = performance.now();
+  let elapsed = 0;
+
+  function animate(timestamp) {
+    if (!__2djs.running) {
+      return;
     }
-    frameCount++;
-    deltaTime = performance.now() - startTime;
+    requestAnimationFrame(animate);
+    elapsed = timestamp - oldTime;
+    if (elapsed > __2djs.frameInterval) {
+      oldTime = timestamp - (elapsed % __2djs.frameInterval);
+      draw?.();
+      if (__2djs.mouseMoved && Object.hasOwn(window, 'mouseMoved')) {
+        mouseMoved();
+      }
+      frameCount++;
+      deltaTime = performance.now() - timestamp;
+    }
   };
 
-  __2djs.intervalId = setInterval(__2djs.intervalCallback, 1000 / __2djs.frameRate);
+  requestAnimationFrame(animate);
 }
 
 /**
@@ -1046,8 +1221,8 @@ function frameRate(fps) {
   if (!__2djs.intervalId) {
     return;
   }
-  clearInterval(__2djs.intervalId);
-  __2djs.intervalId = setInterval(__2djs.intervalCallback, 1000 / fps);
+  __2djs.frameRate = fps;
+  __2djs.frameInterval = 1000 / fps;
 }
 
 /**
@@ -1098,8 +1273,10 @@ function fullscreen(val) {
  * background(makeColor(0, 0, 0));
  */
 function background(color) {
+  const prevStyle = __2djs.ctx.fillStyle;
   __2djs.ctx.fillStyle = color.toString();
   __2djs.ctx.fillRect(0, 0, __2djs.canvas.width, __2djs.canvas.height);
+  __2djs.ctx.fillStyle = prevStyle;
 }
 
 /**
@@ -1383,6 +1560,76 @@ function ellipse(x, y, radiusX, radiusY) {
 }
 
 /**
+ * Zeichnet eine kubische Bezier-Kurve auf der Zeichenfläche.
+ * 
+ * @param {number} x1 - Die x-Koordinate des ersten Steuerpunkts.
+ * @param {number} y1 - Die y-Koordinate des ersten Steuerpunkts.
+ * @param {number} x2 - Die x-Koordinate des zweiten Steuerpunkts.
+ * @param {number} y2 - Die y-Koordinate des zweiten Steuerpunkts.
+ * @param {number} x3 - Die x-Koordinate des dritten Steuerpunkts.
+ * @param {number} y3 - Die y-Koordinate des dritten Steuerpunkts.
+ * @param {number} x4 - Die x-Koordinate des vierten Steuerpunkts.
+ * @param {number} y4 - Die y-Koordinate des vierten Steuerpunkts.
+ * 
+ * @example
+ * // Definieren der Steuerpunkte
+ * const x1 = 50, y1 = 400;  // Startpunkt
+ * const x2 = 150, y2 = 50;  // Erster Steuerpunkt
+ * const x3 = 350, y3 = 50;  // Zweiter Steuerpunkt
+ * const x4 = 450, y4 = 400; // Endpunkt
+ * 
+ * // Zeichnen der Bezier-Kurve auf dem Canvas
+ * bezier(x1, y1, x2, y2, x3, y3, x4, y4);
+ */
+function bezier(x1, y1, x2, y2, x3, y3, x4, y4) {
+  __2djs.ctx.save();
+
+  __2djs.ctx.beginPath();
+  __2djs.ctx.moveTo(x1, y1);
+  __2djs.ctx.bezierCurveTo(x2, y2, x3, y3, x4, y4);
+  __2djs.ctx.stroke();
+
+  __2djs.ctx.restore();
+}
+
+/**
+ * Lädt eine Schriftart von einer Datei (z. B. einer Webadresse oder einer Datei auf dem Server) und fügt sie der Webseite hinzu,
+ * sodass die Schriftart in Texten auf der Seite verwendet werden kann.
+ *
+ * @param {string} fontName - Der Name der Schriftart, die du verwenden möchtest (z. B. "Arial", "Roboto").
+ * @param {string} path - Der Pfad zur Datei, die die Schriftart enthält. Das kann eine URL zu einer Webschriftart oder der Dateipfad auf dem Server sein.
+ *
+ * @example
+ * // Lädt die Schriftart "OpenSans" von einer URL und fügt sie zur Seite hinzu, damit du sie auf der Webseite verwenden kannst.
+ * loadFont('OpenSans', 'https://example.com/fonts/open-sans.woff2');
+ */
+function loadFont(fontName, path) {
+  fetch(path)
+    .then(resp => resp.arrayBuffer())
+    .then(buffer => {
+      const font = new FontFace(fontName, buffer);
+      document.fonts.add(font);
+    });
+}
+
+/**
+ * Setzt die Schriftart für den Text, der auf der Zeichenfläche gezeichnet wird.
+ * 
+ * Diese Funktion wird verwendet, um die Schriftart für den Text in der Zeichenfläche zu ändern. 
+ * Sie verwendet den Namen der Schriftart, die in einer internen Variable gespeichert wird.
+ *
+ * @param {string} fontName - Der Name der Schriftart, die verwendet werden soll (z. B. "Arial", "Times New Roman").
+ * 
+ * @example
+ * // Setzt die Schriftart auf "Arial" und verwendet die aktuelle Textgröße (z. B. 20px).
+ * font('Arial');
+ */
+function font(fontName) {
+  __2djs.fontName = fontName;
+  __2djs.ctx.font = `${__2djs.textSize}px ${fontName}`;
+}
+
+/**
  * Setzt die Schriftgröße für den Text auf der Zeichenfläche.
  *
  * Diese Funktion ändert die Größe des Texts, der auf der Zeichenfläche gezeichnet wird.
@@ -1396,6 +1643,7 @@ function ellipse(x, y, radiusX, radiusY) {
  */
 function textSize(size) {
   __2djs.textSize = size;
+  __2djs.ctx.font = `${size}px ${__2djs.fontName}`;
 }
 
 /**
@@ -1440,8 +1688,6 @@ function textAlign(alignment) {
  * text("Canvas ist cool!", 150, 150);
  */
 function text(text, x, y, size) {
-  __2djs.ctx.font = `${size ?? __2djs.textSize}px Arial`;
-
   __2djs.ctx.save();
 
   __2djs.ctx.fillText(text, x, y + (size ?? __2djs.textSize));
@@ -1537,6 +1783,8 @@ function image(image, x, y, width, height) {
 
   __2djs.ctx.save();
 
+  __2djs.ctx.imageSmoothingEnabled = false;
+
   __2djs.ctx.translate(x + (width ?? image.width) / 2, y + (height ?? image.height) / 2);
   __2djs.ctx.rotate(__2djs.rotation * __2djs.angleMode);
   __2djs.ctx.drawImage(image, -(width ?? image.width) / 2, -(height ?? image.height) / 2, width ?? image.width, height ?? image.height);
@@ -1613,7 +1861,8 @@ function rotateAdd(degrees) {
 }
 
 function stopDraw() {
-  clearInterval(__2djs.intervalId);
+  __2djs.running = false;
+  // clearInterval(__2djs.intervalId);
 }
 
 /**
@@ -1702,6 +1951,37 @@ function min(...values) {
  */
 function max(...values) {
   return Math.max(...values);
+}
+
+/**
+ * Diese Funktion begrenzt den Wert `value` auf einen Bereich zwischen `min` und `max`.
+ * Wenn `value` kleiner als `min` ist, wird `min` zurückgegeben.
+ * Wenn `value` größer als `max` ist, wird `max` zurückgegeben.
+ * Andernfalls wird der Wert von `value` unverändert zurückgegeben.
+ *
+ * @param {number} value - Der Wert, der begrenzt werden soll.
+ * @param {number} min - Der minimale Wert des zulässigen Bereichs.
+ * @param {number} max - Der maximale Wert des zulässigen Bereichs.
+ * @returns {number} - Der begrenzte Wert, der innerhalb des Bereichs [min, max] liegt.
+ * 
+ * @example
+ * // Beispiel 1: Wert liegt innerhalb des Bereichs
+ * console.log(clamp(5, 1, 10));  // Ausgabe: 5
+ * 
+ * // Beispiel 2: Wert ist kleiner als der Mindestwert
+ * console.log(clamp(-3, 0, 10)); // Ausgabe: 0
+ * 
+ * // Beispiel 3: Wert ist größer als der Höchstwert
+ * console.log(clamp(15, 0, 10)); // Ausgabe: 10
+ */
+function clamp(value, min, max) {
+  if (value < min) {
+    return min;
+  } else if (value > max) {
+    return max;
+  } else {
+    return value;
+  }
 }
 
 /**
