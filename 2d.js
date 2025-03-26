@@ -375,6 +375,25 @@ class DrawImage {
   }
 }
 
+class Font {
+  name = null;
+  resolved = false;
+  fontFace = null;
+
+  constructor(name, path) {
+    this.name = name;
+    this.fontFace = new Promise((resolve) => {
+      fetch(path)
+        .then(resp => resp.arrayBuffer())
+        .then(buffer => {
+          const font = new FontFace(name, buffer);
+          resolve(document.fonts.add(font));
+          this.resolved = true;
+        });
+    });
+  }
+}
+
 //#endregion Hilfsklassen
 
 //#region Globale Variablen
@@ -1161,7 +1180,13 @@ function createCanvas(w, h) {
       keyPressed(event.key);
     }
   });
-    
+
+  document.addEventListener('keyup', function(event) {
+    if (Object.hasOwn(window, 'keyUp')) {
+      keyUp(event.key);
+    }
+  });
+  
   __2djs.ctx = __2djs.canvas.getContext('2d');
   background(BLACK);
 
@@ -1593,38 +1618,68 @@ function bezier(x1, y1, x2, y2, x3, y3, x4, y4) {
 }
 
 /**
- * Lädt eine Schriftart von einer Datei (z. B. einer Webadresse oder einer Datei auf dem Server) und fügt sie der Webseite hinzu,
- * sodass die Schriftart in Texten auf der Seite verwendet werden kann.
+ * Lädt eine Schriftart von einer Datei (z. B. einer Webadresse oder einer Datei) und fügt sie der Webseite hinzu,
+ * sodass die Schriftart in Texten auf der Seite verwendet werden kann. 
+ * Die Funktion gibt eine `Font`-Klasse zurück, das verwendet werden kann, um sicherzustellen, dass die Schriftart vollständig 
+ * geladen ist, bevor sie auf der Webseite verwendet wird.
  *
  * @param {string} fontName - Der Name der Schriftart, die du verwenden möchtest (z. B. "Arial", "Roboto").
- * @param {string} path - Der Pfad zur Datei, die die Schriftart enthält. Das kann eine URL zu einer Webschriftart oder der Dateipfad auf dem Server sein.
+ * @param {string} path - Der Pfad zur Datei, die die Schriftart enthält. Das kann eine URL zu einer Webschriftart oder der Dateipfad sein.
+ * 
+ * @returns {Font} Eine `Font`-Klasse, das die geladene Schriftart repräsentiert. Du kannst diese Klasse verwenden, 
+ *                 um auf den Ladezustand der Schriftart zuzugreifen und es in der Zeichnung zu verwenden.
  *
  * @example
  * // Lädt die Schriftart "OpenSans" von einer URL und fügt sie zur Seite hinzu, damit du sie auf der Webseite verwenden kannst.
- * loadFont('OpenSans', 'https://example.com/fonts/open-sans.woff2');
+ * const openSansFont = loadFont('OpenSans', 'https://example.com/fonts/open-sans.ttf');
+ *
+ * @example
+ * // Du kannst die geladene Schriftart auch sofort verwenden, nachdem sie geladen wurde.
+ * const robotoFont = loadFont('Roboto', 'https://example.com/fonts/roboto.woff2');
+ * font(robotoFont);  // Verwende die geladene Schriftart in deiner Zeichenfläche.
  */
 function loadFont(fontName, path) {
-  fetch(path)
-    .then(resp => resp.arrayBuffer())
-    .then(buffer => {
-      const font = new FontFace(fontName, buffer);
-      document.fonts.add(font);
-    });
+  return new Font(fontName, path);
 }
 
 /**
  * Setzt die Schriftart für den Text, der auf der Zeichenfläche gezeichnet wird.
  * 
  * Diese Funktion wird verwendet, um die Schriftart für den Text in der Zeichenfläche zu ändern. 
- * Sie verwendet den Namen der Schriftart, die in einer internen Variable gespeichert wird.
- *
- * @param {string} fontName - Der Name der Schriftart, die verwendet werden soll (z. B. "Arial", "Times New Roman").
+ * Sie unterstützt sowohl den direkten Namen einer Schriftart (als String) als auch die Verwendung eines `Font`-Klasse, 
+ * das eine komplexere Schriftartbehandlung bietet, wie das Laden von Schriftarten über Promises.
+ * 
+ * @param {Font|string} fontName - Der Name der Schriftart, die verwendet werden soll (z. B. "Arial", "Times New Roman") 
+ *                                 oder eine `Font`-Klasse, das eine Schriftartinstanz repräsentiert.
  * 
  * @example
  * // Setzt die Schriftart auf "Arial" und verwendet die aktuelle Textgröße (z. B. 20px).
  * font('Arial');
+ * 
+ * @example
+ * // Setzt die Schriftart auf eine Font-Klasse, die vorher geladen wurde.
+ * const customFont = loadFont('CustomFont', './myFont.ttf');
+ * font(customFont);
  */
 function font(fontName) {
+  if (fontName instanceof Font) {
+    if (fontName.resolved) {
+      for (const f of fontName.fontFace.keys()) {
+        __2djs.fontName = f.family;
+        __2djs.ctx.font = `${__2djs.textSize}px ${f.family}`;
+        break;
+      }
+    } else {
+      fontName.fontFace.then(f => {
+        for (const e of f.keys()) {
+          __2djs.fontName = e.family;
+          __2djs.ctx.font = `${__2djs.textSize}px ${e.family}`;
+          break;
+        }
+      });
+    }
+    return;
+  }
   __2djs.fontName = fontName;
   __2djs.ctx.font = `${__2djs.textSize}px ${fontName}`;
 }
