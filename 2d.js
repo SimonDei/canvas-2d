@@ -37,6 +37,8 @@ const __2djs = {
  * Diese Klasse ermöglicht es, einen 2D-Vektor zu erstellen, der durch zwei Komponenten (x und y) definiert wird.
  * Vektoren werden häufig in der Mathematik, Physik und Computergrafik verwendet, um Positionen oder Bewegungen im zweidimensionalen Raum darzustellen.
  *
+ * @class
+ * 
  * @example
  * // Erstelle einen neuen Vektor mit den Komponenten x = 5 und y = 10
  * const vector = new Vector2(5, 10);
@@ -138,6 +140,8 @@ class Vector2 {
  * Diese Klasse ermöglicht es, einen 3D-Vektor zu erstellen, der durch drei Komponenten (x, y, z) definiert wird.
  * Vektoren werden häufig in der Mathematik, Physik und Computergrafik verwendet, um Positionen oder Bewegungen im dreidimensionalen Raum darzustellen.
  *
+ * @class
+ * 
  * @example
  * // Erstelle einen neuen Vektor mit den Komponenten x = 1, y = 2 und z = 3
  * const vector = new Vector3(1, 2, 3);
@@ -163,6 +167,8 @@ class Vector3 {
  * Diese Klasse ermöglicht es, eine Farbe zu erstellen, die durch drei Farbkomponenten (Rot, Grün, Blau) definiert wird.
  * Außerdem bietet die Klasse eine Methode, um die Farbe als `rgb()`-String darzustellen, der in {@link fill} oder {@link stroke} verwendet werden kann.
  *
+ * @class
+ * 
  * @example
  * // Erstelle eine neue Farbe mit den RGB-Werten 100 % (Rot), 50 % (Grün), und 45 % (Blau)
  * const color = new Color(255, 128, 114);
@@ -290,6 +296,8 @@ class Color {
  * Ein Rechteck hat eine obere linke Ecke, die durch die Koordinaten `x` und `y` definiert ist, 
  * sowie eine Breite (`width`) und eine Höhe (`height`), die die Größe des Rechtecks bestimmen.
  *
+ * @class
+ * 
  * @example
  * // Erstellt ein Rechteck mit der Position (50, 100) und einer Größe von 200x150 Pixel
  * const myRect = new Rect(50, 100, 200, 150);
@@ -297,8 +305,6 @@ class Color {
  * // Zugriff auf die Eigenschaften des Rechtecks
  * console.log(myRect.x); // Gibt 50 aus
  * console.log(myRect.width); // Gibt 200 aus
- *
- * @class
  */
 class Rect {
   /**
@@ -375,6 +381,17 @@ class DrawImage {
   }
 }
 
+/**
+ * Die `Font`-Klasse wird verwendet, um eine Schriftart von einer Datei zu laden und sie der Webseite hinzuzufügen,
+ * sodass sie in Texten auf der Seite verwendet werden kann. Die Klasse stellt sicher, dass die Schriftart vollständig 
+ * geladen ist, bevor sie genutzt wird.
+ *
+ * @class
+ * 
+ * @example
+ * // Beispiel: Eine neue Font-Instanz wird erstellt, um eine Schriftart von einer URL zu laden.
+ * const myFont = new Font('OpenSans', 'https://example.com/fonts/opensans.ttf');
+ */
 class Font {
   name = null;
   resolved = false;
